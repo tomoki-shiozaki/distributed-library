@@ -1,0 +1,14 @@
+@startuml usecase
+skinparam defaultFontName "Noto Sans CJK JP"
+actor 司書
+actor ユーザー
+
+package "分散型図書管理アプリ" {
+司書 --> (アカウント機能)
+ユーザー --> (アカウント機能)
+司書 --> (本の登録)
+ユーザー --> (本の検索)
+ユーザー --> (本の貸出・予約)
+ユーザー --> (本の返却)
+}
+@enduml
