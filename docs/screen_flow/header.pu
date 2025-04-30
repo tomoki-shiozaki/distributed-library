@@ -1,0 +1,12 @@
+@startuml header_screen_flow
+skinparam defaultFontName "Noto Sans CJK JP"
+
+title 分散型図書管理アプリ ヘッダー遷移図
+
+state ホーム {
+  [*] --> ホーム画面#未ログイン 
+  他の画面 --> ホーム画面 : 左上のアプリ名をクリック
+
+}
+
+@enduml

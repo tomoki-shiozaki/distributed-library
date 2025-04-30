@@ -1,0 +1,23 @@
+@startuml state
+skinparam defaultFontName "Noto Sans CJK JP"
+title example
+
+state "ホーム画面" as Home {
+  [*] --> TopPage
+  TopPage : ロゴ、メニュー表示
+}
+
+
+
+state "検索画面" as Search {
+  [*] --> SearchForm
+  SearchForm : 検索フォームを表示
+  SearchForm --> SearchResults : 検索結果を表示
+}
+
+
+
+Home --> Search : 検索ボタンをクリック
+Search --> Home : 戻るボタンをクリック
+
+@enduml
