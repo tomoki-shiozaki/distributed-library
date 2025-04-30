@@ -1,0 +1,32 @@
+@startuml account
+skinparam defaultFontName "Noto Sans CJK JP"
+
+actor ログインユーザー as loggedInUser 
+actor 未ログインユーザー as unloggedUser
+actor 未登録ユーザー as guest
+
+rectangle "分散型図書管理アプリ" {
+package "アカウント" {
+  (ユーザー登録)
+  (ログイン)
+  (ログアウト)
+  (パスワード変更)
+}
+}
+
+
+guest --> (ユーザー登録) : 一般ユーザーとして登録\n司書になるには、superuserに申請
+unloggedUser --> (ログイン)
+
+loggedInUser --> (ログアウト)
+loggedInUser --> (パスワード変更)
+
+note top of (unloggedUser)
+    一般ユーザー/司書
+end note
+
+note top of (loggedInUser)
+    一般ユーザー/司書
+end note
+
+@enduml

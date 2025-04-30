@@ -1,0 +1,47 @@
+@startuml book_management_and_use
+skinparam defaultFontName "Noto Sans CJK JP"
+left to right direction
+
+actor 司書 as loggedInLibrarian
+actor 一般ユーザー as loggedInUser 
+
+
+rectangle "分散型図書管理アプリ" {
+package "本の管理" {
+  (本を登録する)
+}
+
+package "本の利用" {
+  (本を検索する)
+  (本の貸出・予約状況を確認する)
+  (貸出・予約する)
+  (貸出・予約情報を確認する)
+  
+  (自分が貸出・予約中の本を確認する)
+  (返却する・予約を取り消す)
+}
+}
+
+
+loggedInLibrarian --> (本を登録する) 
+
+' 本の検索から貸出・予約完了表示までは一連の処理
+loggedInUser --> (本を検索する) 
+loggedInUser --> (本の貸出・予約状況を確認する) 
+loggedInUser --> (貸出・予約する) 
+loggedInUser --> (貸出・予約情報を確認する) 
+
+
+loggedInUser --> (自分が貸出・予約中の本を確認する)
+loggedInUser --> (返却する・予約を取り消す)
+
+
+note top of (loggedInLibrarian)
+    ログインが必要
+end note
+
+note top of (loggedInUser)
+    ログインが必要
+end note
+
+@enduml
