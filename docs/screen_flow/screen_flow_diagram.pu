@@ -4,11 +4,11 @@ hide empty description
 
 title 分散型図書管理アプリ 画面遷移図   
 
-[*] --> ホーム画面
-state ホーム画面 {
-    state "ログイン前" as notLogin
-    state "一般ユーザー" as user 
-    state "司書" as librarian
+[*] --> top
+state "トップ画面" as top {
+    state "ログイン用トップ画面" as notLogin
+    state "一般ユーザー用トップ画面" as user 
+    state "司書用トップ画面" as librarian
     notLogin --> user : ログインする
     notLogin --> librarian : ログインする
 }
@@ -22,7 +22,7 @@ librarian --> 本の登録
 
 
 state 本の利用 {
-    state "本の検索" as bookSearch
+    state "本の検索画面" as bookSearch
     state "本の検索結果表示" as searchResult
     state "本の貸出状況確認" as bookStatus
     state "貸出・予約" as borrowAndBook
