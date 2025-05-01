@@ -6,43 +6,44 @@ title 分散型図書管理アプリ 画面遷移図
 
 [*] --> ホーム画面
 state ホーム画面 {
-    state ログイン前
-    state ログイン後_一般ユーザー
-    state ログイン後_司書
-    ログイン前 --> ログイン後_司書 : ログインする
-    ログイン前 --> ログイン後_一般ユーザー : ログインする
+    state "ログイン前" as notLogin
+    state "一般ユーザー" as user 
+    state "司書" as librarian
+    notLogin --> user : ログインする
+    notLogin --> librarian : ログインする
 }
 
+state 本の管理 {
+    state 本の登録
+}
+librarian --> 本の登録
+本の登録 --> librarian : 登録完了
 
-ログイン後_司書 --> 本の登録
 
-state 本の登録
-本の登録 --> ログイン後_司書 : 登録完了
-ログイン後_一般ユーザー --> 本の検索
-ログイン後_一般ユーザー --> ユーザーが貸出・予約中の本一覧
 
 state 本の利用 {
-    state 本の検索
-    state 本の検索結果
-    state 貸出状況確認
-    state 貸出・予約
-    state 貸出・予約完了表示
-    state ユーザーが貸出・予約中の本一覧
-    state 返却する・予約を取り消す
-
-    ' 本の貸出・予約のフロー
-    本の検索 --> 本の検索結果
-    本の検索結果 --> 貸出状況確認
-    貸出状況確認 --> 貸出・予約
-    貸出・予約 --> 貸出・予約完了表示
+    state "本の検索" as bookSearch
+    state "本の検索結果表示" as searchResult
+    state "本の貸出状況確認" as bookStatus
+    state "貸出・予約" as borrowAndBook
+    state "貸出・予約完了表示" as borrowCompletion
     
+    state "貸出・予約状況" as borrowingBooks
+    state "返却・予約取消" as returnAndCancelReservation
 
+    ' 本の貸出の流れ
+    bookSearch --> searchResult
+    searchResult --> bookStatus
+    bookStatus --> borrowAndBook
+    borrowAndBook --> borrowCompletion
+    borrowCompletion --> bookSearch 
     
-
+    ' 本の返却の流れ
+    borrowingBooks --> returnAndCancelReservation
+    returnAndCancelReservation --> borrowingBooks : 返却・予約取り消し後
 }
-貸出・予約完了表示 --> ログイン後_一般ユーザー
-' 本の返却・予約取り消しのフロー
-ユーザーが貸出・予約中の本一覧 --> 返却する・予約を取り消す
-返却する・予約を取り消す --> ユーザーが貸出・予約中の本一覧
+user --> bookSearch
+user --> borrowingBooks
+
 
 @enduml
