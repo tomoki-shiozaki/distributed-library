@@ -4,36 +4,44 @@ hide empty description
 
 title 分散型図書管理アプリ 画面遷移図   
 
-[*] --> top
-state "トップ画面" as top {
+legend left
+#LightBlue（青）: 一般ユーザー専用画面
+#LightGreen（黄緑）: 司書専用画面
+#AliceBlue（淡い青）: 検索系の画面
+#MistyRose（ピンク）: ユーザーによる操作画面
+#LightYellow（黄色）: 表示系の画面
+end legend
+
+[*] --> notLogin
+
     state "ログイン用トップ画面" as notLogin
-    state "一般ユーザー用トップ画面" as user 
-    state "司書用トップ画面" as librarian
-    notLogin --> user : ログインする
-    notLogin --> librarian : ログインする
+    state "一般ユーザー用トップ画面" as user #LightBlue
+    state "司書用トップ画面" as librarian #LightGreen
+    notLogin --> user : 一般ユーザーがログインする
+    notLogin --> librarian : 司書がログインする
+
+
+state "司書利用メニュー\n 本の登録" as bookManagement #LightGreen {
+    state "本の登録画面\n ISBNを入力し、本のデータを取得\n 保存場所や版数は手入力する" as bookRegistration <<操作>>
 }
-
-state 本の管理 {
-    state 本の登録
-}
-librarian --> 本の登録
-本の登録 --> librarian : 登録完了
+librarian --> bookRegistration
+bookRegistration --> librarian : 登録完了
 
 
 
-state 本の利用 {
-    state "本の検索画面" as bookSearch
-    state "本の検索結果表示" as searchResult
-    state "本の貸出状況確認" as bookStatus
-    state "貸出・予約" as borrowAndBook
-    state "貸出・予約完了表示" as borrowCompletion
+state "一般ユーザー利用メニュー\n 本の検索・貸出・予約および返却・予約取り消し" as bookUse #LightBlue {
+    state "蔵書の検索画面\n タイトル、著者名を入力する" as bookSearch <<検索>> 
+    state "蔵書の検索結果表示画面\n（蔵書のリストが表示される）" as searchResult <<表示>>
+    state "本の情報確認画面\n 貸出状況（貸出可または貸出中）や書影、関連書籍など" as bookStatus <<表示>>
+    state "貸出・予約画面\n 本を借りたり、予約するための操作をする" as borrowAndBook <<操作>>
+    state "貸出・予約完了表示画面\n 本の名前・貸出期間・本の場所が表示される" as borrowCompletion <<表示>>
     
-    state "貸出・予約状況" as borrowingBooks
-    state "返却・予約取消" as returnAndCancelReservation
+    state "マイライブラリ\n（自分が借りている本、予約している本のリストを見ることができる）" as borrowingBooks <<表示>>
+    state "返却・予約取消画面" as returnAndCancelReservation <<操作>>
 
     ' 本の貸出の流れ
     bookSearch --> searchResult
-    searchResult --> bookStatus
+    searchResult --> bookStatus : 本を選択し、詳細を確認
     bookStatus --> borrowAndBook
     borrowAndBook --> borrowCompletion
     borrowCompletion --> bookSearch 
@@ -44,6 +52,12 @@ state 本の利用 {
 }
 user --> bookSearch
 user --> borrowingBooks
+
+skinparam state {
+  BackgroundColor<<検索>> AliceBlue
+  BackgroundColor<<操作>> MistyRose
+  BackgroundColor<<表示>> LightYellow
+}
 
 
 @enduml

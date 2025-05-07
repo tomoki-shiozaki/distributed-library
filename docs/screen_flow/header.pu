@@ -1,60 +1,62 @@
-@startuml screen_header_flow
+@startuml account_flow
 skinparam defaultFontName "Noto Sans CJK JP"
 hide empty description
 
 
-title 分散型図書管理アプリヘッダー 画面遷移図
-
-' 状態の定義
-state 任意の画面
-state ログイン中の任意の画面
-
-[*] --> ホーム画面
-state ホーム画面 {
-    state ログイン前
-    state ログイン後
-    ログイン後 --> ログイン前 : ログアウト後  
-}
-
-state アカウント機能 {
-    state ログイン画面
-    state パスワード変更
-    state ユーザー登録
-    state パスワード変更確認
-    パスワード変更 --> パスワード変更確認
-    ユーザー登録 --> ログイン画面 : ユーザー登録後
-}
+title 分散型図書管理アプリ アカウント画面遷移図
 
 
+[*] -right-> notLogin
 
-'　ホーム画面とアカウント機能の遷移
-ログイン前 --> ログイン画面
-ログイン画面 --> ログイン後 
-ログイン前 --> ユーザー登録
+    state "トップ画面\n ユーザー登録・ログインを選択する画面" as notLogin <<トップ画面>>
+    state "ログインユーザー用トップ画面\n 一般ユーザー・司書がログインした画面\n ログアウト・パスワード変更できる" as top <<トップ画面>>
+    top -left-> notLogin : アカウント名をクリック→ログアウト選択\n 一般ユーザー・司書がログアウトする
 
-
-
-' ヘッダー
-任意の画面 --> ログイン前 : *未ログイン時
-任意の画面 --> ログイン後 : *ログイン時
-ログイン中の任意の画面 --> ログイン前 : ログアウト後
-ログイン中の任意の画面 --> パスワード変更
-
-note right of 任意の画面 
-    ヘッダーの左上のアプリ名をクリック
-    どの画面からでもホーム画面に戻れる
-    ・未ログイン時 → ホーム（ログイン前）
-    ・ログイン時 → ホーム（ログイン後）
-endnote 
-note right of ログイン中の任意の画面
-    ヘッダーの右上のアカウント名をクリック
-    ログアウト・パスワード変更を選択できる
-endnote 
-
-note right of ログイン前
-未ログイン状態では、ヘッダーの右上に
-ログイン・ユーザー登録ボタンを表示
+note bottom of top
+ユーザーの属性（一般ユーザーまたは司書）により、
+表示内容、遷移先が異なる。（この画面は、全体の画面遷移図に
+おける、一般ユーザー用トップ画面、司書用トップ画面のこと）
 end note
 
+state "アカウント利用メニュー\n ユーザー登録・ログイン・ログアウト・パスワード変更" as account1 {
+    state "ログイン画面\n 名前、パスワードを入力する" as login <<アカウント操作>>
+    state "ユーザー登録画面\n 名前、メールアドレス、パスワードを入力する" as userRegistration <<アカウント操作>>
+    
+    userRegistration --> login : ユーザー登録後
+
+    state "パスワード変更画面\n メールアドレスを入力する" as passwordChange <<アカウント操作>>
+    state "パスワード変更確認画面\n パスワードを変更したというメッセージが表示される" as passwordConfirm <<確認>>
+    passwordChange --> passwordConfirm
+}
+
+notLogin --> login
+notLogin --> userRegistration
+
+top --> passwordChange : アカウント名クリック→パスワード変更選択
+login --> top : ログイン成功
+
+
+note top of notLogin
+【ヘッダーの共通操作】 
+    左上のアプリ名をクリックするとトップ画面に戻る
+endnote 
+
+note top of top
+【ヘッダーの共通操作】
+右上のアカウント名をクリックすると
+ログイン・パスワード変更を選択できる
+end note
+
+skinparam state {
+  BackgroundColor<<トップ画面>> LightBlue
+  BackgroundColor<<アカウント操作>> MistyRose
+  BackgroundColor<<確認>> LightYellow
+}
+
+legend bottom 
+#LightBlue（青）：トップ画面
+#MistyRose（ピンク）：アカウント操作画面
+#LightYellow（黄色）：確認画面
+end legend
 
 @enduml

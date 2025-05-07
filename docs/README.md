@@ -97,6 +97,8 @@
 
 ### 3.1 画面一覧
 
+- 3.1項は後日修正予定
+
 #### 本の管理・利用にかかわる画面
 
 | 画面ID | 画面名       | 概要                       | 備考               |
@@ -125,3 +127,5 @@
 ### 3.2 画面遷移図
 #### 全体の推移
   ![画面遷移図](screen_flow/screen_flow_diagram/screen_flow.svg)
+#### アカウント機能の画面の推移
+  ![アカウント機能](screen_flow/header/account_flow.svg)
