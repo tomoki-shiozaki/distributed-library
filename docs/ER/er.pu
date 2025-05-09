@@ -1,35 +1,51 @@
 @startuml er
  skinparam defaultFontName "Noto Sans CJK JP"
  entity "ユーザーマスター" {
-   +ID <<PK>>
-   +ユーザー名 <<UNIQUE>>
+   +ユーザーID <<PK>>
+   +ログイン名 <<UNIQUE>>
    +メールアドレス
    +パスワード
-   +ロール <<一般／司書>>
+   +ロール <<一般/司書>>
  }
  
- entity "本マスター" {
-   +ID <<PK>>
-   +ISBN 
+ entity "本マスター" as book {
+   +本ID <<PK>>
+   +ISBN <<UNIQUE>>
    +タイトル 
    +著者
    +出版日
    +出版社
    +画像用リンク
-   +保存場所
    +版数
  }
 
- entity "貸出・予約データ" {
-   +ID <<PK>>
-   +ユーザーマスターID <<FK>>
-   +本マスターID <<FK>>
+ entity "蔵書" as Copy {
+   +蔵書ID <<PK>>
+   +本ID <<FK>>
+   +保存場所ID <<FK>>
+   +ステータス <<利用可能/貸出中>>
+   +登録日
+ }
+
+ entity "保存場所マスター" as Location {
+   +保存場所ID <<PK>>
+   +保存場所名
+ }
+
+ entity "利用履歴" {
+   +利用ID <<PK>>
+   +ユーザーID <<FK>>
+   +本ID <<FK>>
    +開始日
    +終了日
-   +ステータス <<予約中／貸出中／返却済み>>
+   +ステータス <<貸出中/予約中/返却済み/予約取り消し済み>>
  }
+
  
- "ユーザーマスター" ||--o{ "貸出・予約データ" : ユーザーマスターID
- "本マスター" ||--o{ "貸出・予約データ" : 本マスターID
+ 
+ "ユーザーマスター" ||--o{ "利用履歴" : ユーザーID
+ book ||--o{ "利用履歴" : 本ID
+ book ||--|{ Copy : 本ID
+ Location ||--o{ "Copy" : 保存場所ID
 
  @enduml
