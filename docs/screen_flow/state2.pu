@@ -1,0 +1,31 @@
+@startuml state2
+hide empty description
+left to right direction
+title Example State Transition Diagram3
+
+[*] -down-> メニュー1
+メニュー1 -down-> メニュー2
+
+state メニュー2 {
+	state "概要" as メニュー2概要
+    state "詳細" as メニュー2詳細
+	[*] -down-> メニュー2概要
+    メニュー2概要 -down-> メニュー2詳細 : 詳細
+    メニュー2詳細 -down-> メニュー2概要 : 概要
+}
+
+[*] -down-> メニュー3
+メニュー3 -down-> メニュー4
+
+state メニュー4 {
+	state "概要" as メニュー4概要
+    state "詳細" as メニュー4詳細
+	[*] -down-> メニュー4概要
+    メニュー4概要 -down-> メニュー4詳細 : 詳細
+    メニュー4詳細 -down-> メニュー4概要 : 概要
+}
+
+メニュー2 --> メニュー4
+メニュー4 --> メニュー2
+
+@enduml
