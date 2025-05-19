@@ -18,7 +18,7 @@
     <div class="container-fluid">
         <div class="wrapper">
             <header>
-                <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+                <nav class="navbar navbar-expand-md navbar-dark bg-success mb-4">
                     <a href="{% url 'home' %}" class="navbar-brand" id="site-name">オセロ</a>
                     {% if user.is_authenticated %}
                     <ul class="navbar-nav mr-auto">
@@ -50,13 +50,10 @@
                             </li>
                         </ul>
                         {% else %}
-                        <form class="form-inline ms-auto">
-                            <a href="{% url 'login' %}" class="btn btn-outline-secondary">
-                                ログイン</a>
-                            <a href="{% url 'signup' %}" class="btn btn-primary ms-2">
-
-                                サインアップ</a>
-                        </form>
+                        <div class="d-flex ms-auto">
+                            <a href="{% url 'login' %}" class="btn btn-secondary">ログイン</a>
+                            <a href="{% url 'signup' %}" class="btn btn-primary ms-2">サインアップ</a>
+                        </div>
                         {% endif %}
                     </div>
                 </nav>
