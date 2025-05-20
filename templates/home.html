@@ -3,11 +3,13 @@
 {% block title %}ホーム{% endblock title %}
 {% block content %}
 
-<div class="container bg-light p-5">
-    <h1 class="display-4">オセロアプリ</h1>
-    <p class="lead">Djangoで作ったオセロアプリです。</p>
-    <p class="lead">
-    <!-- ここには、ログインリンクなどを張る -->
+<div class="container bg-light p-5 text-center rounded shadow mt-5">
+    <h1 class="display-4 fw-bold text-dark">📚 分散型図書管理アプリ</h1>
+    <p class="lead">Djangoで作った図書アプリです。</p>
+    <p class="lead mt-4">
+        <a href="{% url 'login' %}" class="btn btn-outline-dark btn-lg">ログイン</a>
+        <a href="{% url 'signup' %}" class="btn btn-dark btn-lg ms-2">新規登録</a>
     </p>
-    </div>
+</div>
+
 {% endblock content %}
