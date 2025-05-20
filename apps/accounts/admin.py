@@ -16,6 +16,11 @@ class CustomUserAdmin(UserAdmin):
         "role",
         "is_staff",
     ]
+    fieldsets = UserAdmin.fieldsets + (("カスタムフィールド", {"fields": ("role",)}),)
+
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ("カスタムフィールド", {"fields": ("role",)}),
+    )
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
