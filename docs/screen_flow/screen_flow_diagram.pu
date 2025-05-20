@@ -14,11 +14,13 @@ end legend
 
 [*] --> notLogin
 
-    state "ログイン用トップ画面" as notLogin
+    state "トップ画面" as notLogin
+    state "ログイン画面" as login
     state "一般ユーザー用トップ画面" as user #LightBlue
     state "司書用トップ画面" as librarian #LightGreen
-    notLogin --> user : 一般ユーザーがログインする
-    notLogin --> librarian : 司書がログインする
+    notLogin --> login 
+    login --> user : 一般ユーザーがログインする
+    login --> librarian : 司書がログインする
 
 
 state "司書利用メニュー\n 本の登録" as bookManagement #LightGreen {
