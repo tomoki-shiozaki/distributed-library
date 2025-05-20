@@ -63,22 +63,9 @@ class CustomUserCreationFormTest(TestCase):
             "email": "newuser@example.com",
             "password1": "S3curePa$$word!",
             "password2": "S3curePa$$word!",
-            "role": GENERAL,  # カスタムフィールドであるroleをテスト
         }
         form = CustomUserCreationForm(data=form_data)
         self.assertTrue(form.is_valid())
-
-    def test_custom_user_creation_form_invalid_data(self):
-        form_data = {
-            "username": "newuser",
-            "email": "newuser@example.com",
-            "password1": "S3curePa$$word!",
-            "password2": "S3curePa$$word!",
-            "role": "invalid_role",  # 無効なレベルを設定
-        }
-        form = CustomUserCreationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("role", form.errors)  # roleフィールドにエラーがあることを確認
 
     def test_custom_user_creation_form_invalid_password(self):
         form_data = {
@@ -86,7 +73,6 @@ class CustomUserCreationFormTest(TestCase):
             "email": "newuser@example.com",
             "password1": "123",  # 短すぎるパスワード
             "password2": "123",
-            "role": GENERAL,
         }
         form = CustomUserCreationForm(data=form_data)
         self.assertFalse(form.is_valid())
