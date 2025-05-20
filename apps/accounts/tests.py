@@ -4,12 +4,15 @@ from django.urls import reverse
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
+GENERAL = "general"
+LIBRARIAN = "librarian"
+
 
 # Create your tests here.
 class SignupPageTests(TestCase):
     username = "newuser"
     email = "newuser@email.com"
-    level = "beginner"
+    role = GENERAL
 
     def test_signup_page_status_code(self):
         response = self.client.get("/accounts/signup/")
@@ -26,28 +29,31 @@ class SignupPageTests(TestCase):
 
     def test_signup_form(self):
         new_user = get_user_model().objects.create_user(
-            self.username, self.email, self.level
+            self.username, self.email, self.role
         )
         self.assertEqual(get_user_model().objects.all().count(), 1)
         self.assertEqual(get_user_model().objects.all()[0].username, self.username)
         self.assertEqual(get_user_model().objects.all()[0].email, self.email)
-        self.assertEqual(get_user_model().objects.all()[0].level, self.level)
+        self.assertEqual(get_user_model().objects.all()[0].role, self.role)
 
 
 class CustomUserModelTest(TestCase):
-    def test_default_level_is_beginner(self):
+    def test_default_role_is_general(self):
         user = get_user_model().objects.create_user(
             username="testuser", password="password123"
         )
-        self.assertEqual(user.level, get_user_model().BEGINNER)
+        self.assertEqual(user.role, get_user_model().GENERAL)
 
     def test_all_valid_values(self):
         User = get_user_model()
-        for level in [User.BEGINNER, User.INTERMEDIATE, User.ADVANCED]:
+        for role in [
+            User.GENERAL,
+            User.LIBRARIAN,
+        ]:
             user = User.objects.create_user(
-                username=f"testuser_{level}", password="password123", level=level
+                username=f"testuser_{role}", password="password123", role=role
             )
-            self.assertEqual(user.level, level)
+            self.assertEqual(user.role, role)
 
 
 class CustomUserCreationFormTest(TestCase):
@@ -57,7 +63,7 @@ class CustomUserCreationFormTest(TestCase):
             "email": "newuser@example.com",
             "password1": "S3curePa$$word!",
             "password2": "S3curePa$$word!",
-            "level": "beginner",  # カスタムフィールドであるlevelをテスト
+            "role": GENERAL,  # カスタムフィールドであるroleをテスト
         }
         form = CustomUserCreationForm(data=form_data)
         self.assertTrue(form.is_valid())
@@ -68,11 +74,11 @@ class CustomUserCreationFormTest(TestCase):
             "email": "newuser@example.com",
             "password1": "S3curePa$$word!",
             "password2": "S3curePa$$word!",
-            "level": "invalid_level",  # 無効なレベルを設定
+            "role": "invalid_role",  # 無効なレベルを設定
         }
         form = CustomUserCreationForm(data=form_data)
         self.assertFalse(form.is_valid())
-        self.assertIn("level", form.errors)  # levelフィールドにエラーがあることを確認
+        self.assertIn("role", form.errors)  # roleフィールドにエラーがあることを確認
 
     def test_custom_user_creation_form_invalid_password(self):
         form_data = {
@@ -80,7 +86,7 @@ class CustomUserCreationFormTest(TestCase):
             "email": "newuser@example.com",
             "password1": "123",  # 短すぎるパスワード
             "password2": "123",
-            "level": "beginner",
+            "role": GENERAL,
         }
         form = CustomUserCreationForm(data=form_data)
         self.assertFalse(form.is_valid())
@@ -98,12 +104,12 @@ class CustomUserChangeFormTest(TestCase):
             username="newuser",
             email="newuser@email.com",
             password="S3curePa$$word!",
-            level="beginner",
+            role=GENERAL,
         )
         form_data = {
             "username": "testuser",
             "email": "testuser@example.com",
-            "level": "intermediate",
+            "role": LIBRARIAN,
         }
         form = CustomUserChangeForm(data=form_data, instance=user)
         self.assertTrue(form.is_valid())
@@ -112,4 +118,4 @@ class CustomUserChangeFormTest(TestCase):
         updated_user = form.save()
         self.assertEqual(updated_user.username, "testuser")
         self.assertEqual(updated_user.email, "testuser@example.com")
-        self.assertEqual(updated_user.level, "intermediate")
+        self.assertEqual(updated_user.role, LIBRARIAN)
