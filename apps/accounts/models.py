@@ -4,18 +4,17 @@ from django.db import models
 
 # Create your models here.
 class CustomUser(AbstractUser):
-    BEGINNER = "beginner"
-    INTERMEDIATE = "intermediate"
-    ADVANCED = "advanced"
+    GENERAL = "general"
+    LIBRARIAN = "librarian"
 
-    LEVEL_CHOICES = [
-        (BEGINNER, "初心者"),
-        (INTERMEDIATE, "中級者"),
-        (ADVANCED, "上級者"),
+    ROLE_CHOICES = [
+        (GENERAL, "一般"),
+        (LIBRARIAN, "司書"),
     ]
-    level = models.CharField(
-        max_length=15,
-        choices=LEVEL_CHOICES,
-        default=BEGINNER,  # デフォルトは「初心者」
-        verbose_name="レベル",
+    role = models.CharField(
+        max_length=10,
+        choices=ROLE_CHOICES,
+        default=GENERAL,  # デフォルトは「一般」
+        verbose_name="ロール",
+        help_text="ユーザーの役割を選択してください。",
     )

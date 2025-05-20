@@ -11,7 +11,7 @@ class CustomUserCreationForm(UserCreationForm):
         fields = (
             "username",
             "email",
-            "level",
+            "role",
         )
         # fields = UserCreationForm.Meta.fields + ("level",)
 
@@ -23,6 +23,6 @@ class CustomUserChangeForm(UserChangeForm):
         fields = (
             "username",
             "email",
-            "level",
+            "role",
         )
         # fields = UserChangeForm.Meta.fields
