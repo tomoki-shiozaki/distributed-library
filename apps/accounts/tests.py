@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.test.client import Client
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
@@ -9,6 +10,37 @@ LIBRARIAN = "librarian"
 
 
 # Create your tests here.
+class CustomUserAdminTest(TestCase):
+    def setUp(self):
+        # テスト用のスーパーユーザーを作成
+        self.admin_user = get_user_model().objects.create_superuser(
+            username="admin",
+            email="admin@example.com",
+            password="password123",
+        )
+
+        # クライアントでログイン
+        self.client = Client()
+        self.client.login(username="admin", password="password123")
+
+    def test_user_role_display_in_admin(self):
+        # 新規ユーザーを作成
+        user = get_user_model().objects.create_user(
+            username="newuser",
+            email="newuser@example.com",
+            password="password123",
+        )
+
+        # 管理画面のユーザー詳細ページにアクセス
+        response = self.client.get(
+            reverse("admin:accounts_customuser_change", args=[user.id])
+        )
+
+        # ユーザー詳細画面に「role」フィールドが表示されていることを確認
+        self.assertContains(response, "role")
+        self.assertContains(response, GENERAL)
+
+
 class SignupPageTests(TestCase):
     username = "newuser"
     email = "newuser@email.com"
