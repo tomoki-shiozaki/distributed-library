@@ -7,10 +7,36 @@
     <h1 class="display-4 fw-bold text-dark">📚 分散型図書管理アプリ</h1>
     <p class="lead">Djangoで作った図書アプリです。</p>
     <h2>{{ message }}</h2>
+
+    {% if user.is_authenticated %}
+    <p>{{ user.username }} さん、ようこそ！</p>
+    {% if user.is_librarian %}
+    <!-- 管理者向けリンク -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">管理機能</h5>
+            <p class="card-text">以下のリンクから管理機能にアクセスできます。</p>
+            <a href="#" class="btn btn-primary btn-lg">管理機能リンク1</a>
+            <a href="#" class="btn btn-success btn-lg ms-2">管理機能リンク2</a>
+        </div>
+    </div>
+    {% elif user.is_general %}
+    <!-- 一般ユーザー向けリンク -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">一般ユーザーの機能</h5>
+            <p class="card-text">以下のリンクから一般ユーザー向けの機能にアクセスできます。</p>
+            <a href="#" class="btn btn-outline-primary btn-lg">一般ユーザーリンク1</a>
+            <a href="#" class="btn btn-outline-secondary btn-lg ms-2">一般ユーザーリンク2</a>
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
     <p class="lead mt-4">
         <a href="{% url 'login' %}" class="btn btn-outline-dark btn-lg">ログイン</a>
         <a href="{% url 'signup' %}" class="btn btn-dark btn-lg ms-2">新規登録</a>
     </p>
+    {% endif %}
 </div>
 
 {% endblock content %}
