@@ -2,11 +2,12 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.test.client import Client
+from apps.accounts.models import CustomUser
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
-GENERAL = "general"
-LIBRARIAN = "librarian"
+GENERAL = CustomUser.GENERAL
+LIBRARIAN = CustomUser.LIBRARIAN
 
 
 # Create your tests here.

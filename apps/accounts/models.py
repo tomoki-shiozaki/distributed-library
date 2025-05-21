@@ -18,3 +18,11 @@ class CustomUser(AbstractUser):
         verbose_name="ロール",
         help_text="ユーザーの役割を選択してください。",
     )
+
+    @property
+    def is_librarian(self):
+        return self.role == self.LIBRARIAN
+
+    @property
+    def is_general(self):
+        return self.role == self.GENERAL

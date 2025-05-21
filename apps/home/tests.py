@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
+from apps.accounts.models import CustomUser
 
-GENERAL = "general"
-LIBRARIAN = "librarian"
+GENERAL = CustomUser.GENERAL
+LIBRARIAN = CustomUser.LIBRARIAN
 
 
 # Create your tests here.
-class HomePageTests(SimpleTestCase):
+class HomePageTests(TestCase):
 
     def test_home_page_status_code(self):
         response = self.client.get("/")
@@ -53,4 +54,4 @@ class TopPageViewTests(TestCase):
         )
         self.client.login(username="librarian", password="testpass")
         response = self.client.get(self.url)
-        self.assertContains(response, "管理機能リンク")
+        self.assertContains(response, "司書向けの案内")
