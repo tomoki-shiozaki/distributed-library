@@ -40,6 +40,60 @@ class CustomUserAdminTest(TestCase):
         self.assertContains(response, "role")
         self.assertContains(response, GENERAL)
 
+    def test_admin_can_update_user_role(self):
+        # テスト対象ユーザーを作成
+        user = get_user_model().objects.create_user(
+            username="newuser",
+            email="newuser@example.com",
+            password="password123",
+        )
+
+        # 管理画面のユーザー変更 URL を生成
+        url = reverse("admin:accounts_customuser_change", args=[user.id])
+
+        # 現在のフォーム内容を GET で取得
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        # フォームの初期データを取得
+        form = response.context["adminform"].form
+        form_data = form.initial
+
+        # role を LIBRARIAN に変更
+        form_data["role"] = LIBRARIAN
+
+        # 重要：他の必須フィールドを含める（admin画面で必要なすべて）
+        form_data.update(
+            {
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "is_active": user.is_active,
+                "is_staff": user.is_staff,
+                "is_superuser": user.is_superuser,
+                "date_joined_0": user.date_joined.strftime("%Y-%m-%d"),
+                "date_joined_1": user.date_joined.strftime("%H:%M:%S"),
+            }
+        )
+        # None の値を削除
+        form_data.pop("last_login", None)
+        if user.last_login:
+            form_data.update(
+                {
+                    "last_login_0": user.last_login.strftime("%Y-%m-%d"),
+                    "last_login_1": user.last_login.strftime("%H:%M:%S"),
+                }
+            )
+
+        # POST リクエストを送信
+        response = self.client.post(url, form_data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        # ユーザーの role を検証
+        user.refresh_from_db()
+        self.assertEqual(user.role, LIBRARIAN)
+
 
 class SignupPageTests(TestCase):
     username = "newuser"
