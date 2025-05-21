@@ -2,6 +2,9 @@ from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
+GENERAL = "general"
+LIBRARIAN = "librarian"
+
 
 # Create your tests here.
 class HomePageTests(SimpleTestCase):
@@ -20,3 +23,34 @@ class HomePageTests(SimpleTestCase):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "home.html")
+
+
+class TopPageViewTests(TestCase):
+    def setUp(self):
+        self.url = reverse("home")
+
+    def test_top_page_for_anonymous_user(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "ログインしてください")
+
+    def test_top_page_for_general_user(self):
+        user = get_user_model().objects.create_user(
+            username="user",
+            email="user@example.com",
+            password="testpass",
+            role=GENERAL,
+        )
+        self.client.login(username="user", password="testpass")
+        response = self.client.get(self.url)
+        self.assertContains(response, "一般ユーザー向けの案内")
+
+    def test_top_page_for_librarian_user(self):
+        librarian = get_user_model().objects.create_user(
+            username="librarian",
+            email="lib@example.com",
+            password="testpass",
+            role=LIBRARIAN,
+        )
+        self.client.login(username="librarian", password="testpass")
+        response = self.client.get(self.url)
+        self.assertContains(response, "管理機能リンク")
