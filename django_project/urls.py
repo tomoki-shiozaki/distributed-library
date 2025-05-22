@@ -24,4 +24,5 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("", include("apps.home.urls")),
     path("mybooks/", include("apps.mybooks.urls")),
+    path("library/", include("apps.library.urls")),
 ]

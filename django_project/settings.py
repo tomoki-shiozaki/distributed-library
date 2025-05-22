@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "apps.accounts.apps.AccountsConfig",
     "apps.home.apps.HomeConfig",
     "apps.mybooks.apps.MybooksConfig",
+    "apps.library.apps.LibraryConfig",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
