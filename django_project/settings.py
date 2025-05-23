@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     # Local
     "apps.accounts.apps.AccountsConfig",
     "apps.home.apps.HomeConfig",
-    "apps.mybooks.apps.MybooksConfig",
+    "apps.user_libraries.apps.UserLibrariesConfig",
     "apps.library.apps.LibraryConfig",
 ]
 

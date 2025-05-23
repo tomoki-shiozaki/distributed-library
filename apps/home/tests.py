@@ -47,7 +47,7 @@ class TopPageViewTests(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, "一般ユーザー向けの案内")
         self.assertContains(response, f'href="{reverse("book_search")}"')
-        self.assertContains(response, f'href="{reverse("mybooks")}"')
+        self.assertContains(response, f'href="{reverse("user_loans_list")}"')
 
     def test_top_page_for_librarian_user(self):
         librarian = get_user_model().objects.create_user(
