@@ -46,6 +46,8 @@ class TopPageViewTests(TestCase):
         self.client.login(username="user", password="testpass")
         response = self.client.get(self.url)
         self.assertContains(response, "一般ユーザー向けの案内")
+        self.assertContains(response, f'href="{reverse("book_search")}"')
+        self.assertContains(response, f'href="{reverse("mybooks")}"')
 
     def test_top_page_for_librarian_user(self):
         librarian = get_user_model().objects.create_user(
@@ -57,26 +59,4 @@ class TopPageViewTests(TestCase):
         self.client.login(username="librarian", password="testpass")
         response = self.client.get(self.url)
         self.assertContains(response, "司書向けの案内")
-
-    def test_home_template_renders_general_use_link_for_general_user(self):
-        user = get_user_model().objects.create_user(
-            username="user",
-            email="user@example.com",
-            password="testpass",
-            role=GENERAL,
-        )
-        self.client.login(username="user", password="testpass")
-        response = self.client.get(self.url)
-        self.assertContains(response, f'href="{reverse("book_search")}"')
-        self.assertContains(response, f'href="{reverse("mybooks")}"')
-
-    def test_home_template_renders_registration_link_for_librarian(self):
-        librarian = get_user_model().objects.create_user(
-            username="librarian",
-            email="lib@example.com",
-            password="testpass",
-            role=LIBRARIAN,
-        )
-        self.client.login(username="librarian", password="testpass")
-        response = self.client.get(self.url)
         self.assertContains(response, f'href="{reverse("book_add")}"')
