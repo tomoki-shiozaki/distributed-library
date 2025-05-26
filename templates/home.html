@@ -16,7 +16,7 @@
         <div class="card-body">
             <h5 class="card-title">管理機能</h5>
             <p class="card-text">以下のリンクから管理機能にアクセスできます。</p>
-            <a href="{% url 'catalog:create_book' %}" class="btn btn-primary btn-lg">本の登録</a>
+            <a href="{% url 'catalog:new' %}" class="btn btn-primary btn-lg">本の登録</a>
             <!-- <a href="#" class="btn btn-success btn-lg ms-2">管理機能リンク2</a> -->
         </div>
     </div>
@@ -27,8 +27,8 @@
         <div class="card-body">
             <h5 class="card-title">一般ユーザーの機能</h5>
             <p class="card-text">以下のリンクから一般ユーザー向けの機能にアクセスできます。</p>
-            <a href="{% url 'user_loans_list' %}" class="btn btn-outline-primary btn-lg">マイライブラリ</a>
-            <a href="{% url 'book_search' %}" class="btn btn-outline-secondary btn-lg ms-2">本の検索・貸出・予約</a>
+            <a href="{% url 'user_libraries:user_loan_list' %}" class="btn btn-outline-primary btn-lg">マイライブラリ</a>
+            <a href="{% url 'library:search' %}" class="btn btn-outline-secondary btn-lg ms-2">本の検索・貸出・予約</a>
         </div>
     </div>
     {% endif %}

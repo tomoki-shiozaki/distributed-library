@@ -3,5 +3,5 @@ from django.views.generic import TemplateView
 
 
 # Create your views here.
-class UserLoansListView(TemplateView):
-    template_name = "user_libraries/user_loans_list.html"
+class UserLoanListView(TemplateView):
+    template_name = "user_libraries/user_loan_list.html"

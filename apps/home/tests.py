@@ -46,8 +46,10 @@ class TopPageViewTests(TestCase):
         self.client.login(username="user", password="testpass")
         response = self.client.get(self.url)
         self.assertContains(response, "一般ユーザー向けの案内")
-        self.assertContains(response, f'href="{reverse("book_search")}"')
-        self.assertContains(response, f'href="{reverse("user_loans_list")}"')
+        self.assertContains(response, f'href="{reverse("library:search")}"')
+        self.assertContains(
+            response, f'href="{reverse("user_libraries:user_loan_list")}"'
+        )
 
     def test_top_page_for_librarian_user(self):
         librarian = get_user_model().objects.create_user(
@@ -59,4 +61,4 @@ class TopPageViewTests(TestCase):
         self.client.login(username="librarian", password="testpass")
         response = self.client.get(self.url)
         self.assertContains(response, "司書向けの案内")
-        self.assertContains(response, f'href="{reverse("catalog:create_book")}"')
+        self.assertContains(response, f'href="{reverse("catalog:new")}"')

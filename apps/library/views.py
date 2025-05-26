@@ -3,5 +3,5 @@ from django.views.generic import TemplateView
 
 
 # Create your views here.
-class SearchBooksView(TemplateView):
-    template_name = "library/search_books.html"
+class BookSearchView(TemplateView):
+    template_name = "library/book_search.html"
