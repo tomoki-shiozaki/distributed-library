@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}ホーム{% endblock title %}
+{% block content %}
+
+<div class="container bg-light p-5 text-center rounded shadow mt-5">
+    <h1 class="display-4 fw-bold text-dark">📚 分散型図書管理アプリ</h1>
+    <p class="lead">Djangoで作った図書アプリです。</p>
+
+    {% if user.is_authenticated %}
+    <p>{{ user.username }} さん、ようこそ！</p>
+    {% if user.is_librarian %}
+    <!-- 司書用トップ画面 -->
+    <h2>司書向けの案内</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">管理機能</h5>
+            <p class="card-text">以下のリンクから管理機能にアクセスできます。</p>
+            <a href="{% url 'catalog:new' %}" class="btn btn-primary btn-lg">本の登録</a>
+            <!-- <a href="#" class="btn btn-success btn-lg ms-2">管理機能リンク2</a> -->
+        </div>
+    </div>
+    {% elif user.is_general %}
+    <!-- 一般ユーザー用トップ画面 -->
+    <h2>一般ユーザー向けの案内</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">一般ユーザーの機能</h5>
+            <p class="card-text">以下のリンクから一般ユーザー向けの機能にアクセスできます。</p>
+            <a href="{% url 'user_libraries:user_loan_list' %}" class="btn btn-outline-primary btn-lg">マイライブラリ</a>
+            <a href="{% url 'library:search' %}" class="btn btn-outline-secondary btn-lg ms-2">本の検索・貸出・予約</a>
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <!-- ログイン前のトップ画面 -->
+    <h2>ログインしてください</h2>
+    <p class="lead mt-4">
+        <a href="{% url 'login' %}" class="btn btn-outline-dark btn-lg">ログイン</a>
+        <a href="{% url 'signup' %}" class="btn btn-dark btn-lg ms-2">新規登録</a>
+    </p>
+    {% endif %}
+</div>
+
+{% endblock content %}
