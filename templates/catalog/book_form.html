@@ -1,8 +1,14 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block title %}本の登録{% endblock title %}
 {% block content %}
 
 <h1>本の登録</h1>
+<form action="" method="post">{% csrf_token %}
+    {% crispy form %}
+    <button class="btn btn-success ml-2" type="submit">本の登録</button>
+</form>
 
 {% endblock content %}
