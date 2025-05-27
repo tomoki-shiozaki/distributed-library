@@ -46,6 +46,9 @@ class Copy(models.Model):
     )
     registered_date = models.DateField(auto_now_add=True, verbose_name="登録日")
 
+    def __str__(self):
+        return f"{self.book} - {self.location.name} - {self.get_status_display()}"
+
     class Meta:
         verbose_name = "蔵書"
         verbose_name_plural = "蔵書"
