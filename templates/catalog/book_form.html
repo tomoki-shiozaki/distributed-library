@@ -8,6 +8,7 @@
 <h1>本の登録</h1>
 <form action="" method="post">{% csrf_token %}
     {{ book_form|crispy }}
+    <!-- 書影（画像） -->
     {{ copy_form|crispy }}
     <button class="btn btn-success ml-2" type="submit">本の登録</button>
 </form>
