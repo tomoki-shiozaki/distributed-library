@@ -7,7 +7,40 @@
 
 <h1>本の登録</h1>
 <form action="" method="post">{% csrf_token %}
-    {% crispy form %}
+    <label for="{{ form.isbn.id_for_label }}">ISBN:</label>
+    {{ form.isbn }}
+    {{ form.isbn.errors }}
+    <br>
+
+    <label for="{{ form.title.id_for_label }}">タイトル:</label>
+    {{ form.title }}
+    {{ form.title.errors }}
+    <br>
+
+    <label for="{{ form.author.id_for_label }}">著者:</label>
+    {{ form.author }}
+    {{ form.author.errors }}
+    <br>
+
+    <label for="{{ form.publisher.id_for_label }}">出版社:</label>
+    {{ form.publisher }}
+    {{ form.publisher.errors }}
+    <br>
+
+    <label for="{{ form.published_date.id_for_label }}">出版日:</label>
+    {{ form.published_date }}
+    {{ form.published_date.errors }}
+    <br>
+
+    <label for="{{ form.image_url.id_for_label }}">画像用リンク:</label>
+    {{ form.image_url }}
+    {{ form.image_url.errors }}
+    <br>
+
+    <label for="{{ form.edition.id_for_label }}">版数:</label>
+    {{ form.edition }}
+    {{ form.edition.errors }}
+    <br>
     <button class="btn btn-success ml-2" type="submit">本の登録</button>
 </form>
 
