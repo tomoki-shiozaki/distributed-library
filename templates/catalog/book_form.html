@@ -1,16 +1,28 @@
 {% extends 'base.html' %}
 
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}本の登録{% endblock title %}
 {% block content %}
 
+
 <h1>本の登録</h1>
 <form action="" method="post">{% csrf_token %}
     {{ book_form|crispy }}
-    <!-- 書影（画像） -->
+    
+    <!-- 書影用の要素をフォームの近くに追加 -->
+    <img id="book-cover" src="" alt="書影" style="max-width: 200px; margin-top: 10px; display: none;">
+
     {{ copy_form|crispy }}
     <button class="btn btn-success ml-2" type="submit">本の登録</button>
 </form>
 
+
+
 {% endblock content %}
+
+{% block extra_js %}
+<!-- JavaScript-->
+<script src="{% static 'js/catalog/book_form.js' %}"></script>
+{% endblock %}

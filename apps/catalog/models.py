@@ -9,7 +9,7 @@ class Book(models.Model):
     publisher = models.CharField(max_length=255, verbose_name="出版社")
     published_date = models.DateField(verbose_name="出版日")
     image_url = models.URLField(blank=True, verbose_name="画像用リンク")
-    edition = models.PositiveIntegerField(default=1, verbose_name="版数")
+    edition = models.PositiveIntegerField(verbose_name="版数")
 
     def __str__(self):
         return f"{self.title}（第{self.edition}版）"

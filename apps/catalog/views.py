@@ -9,27 +9,6 @@ from apps.catalog.models import Book
 
 
 # Create your views here.
-# class BookCreateView(CreateView):
-#     template_name = "catalog/book_form.html"
-#     model = Book
-#     fields = (
-#         "isbn",
-#         "title",
-#         "author",
-#         "publisher",
-#         "published_date",
-#         "image_url",
-#         "edition",
-#     )
-
-#     def form_valid(self, form):
-#         # Bookの作成
-#         book = form.save()
-
-#         # Copyの作成（BookとCopyの紐付け）
-#         Copy.objects.create(book=book, location=)
-
-#         return redirect("hoge")
 
 
 def create_book_and_copy(request):
@@ -37,21 +16,26 @@ def create_book_and_copy(request):
         book_form = BookForm(request.POST)
         copy_form = CopyForm(request.POST)
 
-        if book_form.is_valid() and copy_form.is_valid():
+        isbn = request.POST.get("isbn")
+        try:
+            # 既に存在する本を取得
+            book = Book.objects.get(isbn=isbn)
+            created = False
+            book_form_is_valid = True  # 既存ならフォーム検証スキップ
+        except Book.DoesNotExist:
+            book = None
+            created = True
+            book_form_is_valid = book_form.is_valid()
+
+        if book_form_is_valid and copy_form.is_valid():
             with transaction.atomic():
-                # 1. 親モデルのBookを保存
-                book = book_form.save()
-                # 入力されたAuthor.nameで既存のレコードを探す
-                # book_isbn = book_form.cleaned_data["isbn"]
-                # book, created = Book.objects.get_or_create(isbn=book_isbn)
+                if created:
+                    # 新規Bookを登録
+                    book = book_form.save()
 
-                # 2. 子モデルのCopyを保存(commit=Falseでインスタンスだけ作成)
+                # Copyを作成・保存
                 copy = copy_form.save(commit=False)
-
-                # 3. Copyに親のBookをセット
                 copy.book = book
-
-                # 4. Copyを保存
                 copy.save()
 
             return redirect(reverse("home"))
