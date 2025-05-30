@@ -1,11 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView
 from django.db import transaction
 from django.urls import reverse
 
 from apps.catalog.forms import BookForm, CopyForm
-from apps.catalog.models import Book
+from apps.catalog.models import Book, Copy
 
 
 # Create your views here.
@@ -38,7 +38,7 @@ def create_book_and_copy(request):
                 copy.book = book
                 copy.save()
 
-            return redirect(reverse("home"))
+            return redirect("catalog:copy_confirm", copy.pk)
 
     else:
         book_form = BookForm()
@@ -50,5 +50,18 @@ def create_book_and_copy(request):
         {
             "book_form": book_form,
             "copy_form": copy_form,
+        },
+    )
+
+
+def copy_confirm(request, pk):
+    copy = get_object_or_404(Copy, pk=pk)
+    book = copy.book
+    return render(
+        request,
+        "catalog/copy_confirm.html",
+        {
+            "book": book,
+            "copy": copy,
         },
     )
