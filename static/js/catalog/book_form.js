@@ -1,8 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
     const isbnInput = document.getElementById("id_isbn");
-    if (!isbnInput) return;
+    const fetchButton = document.getElementById("fetch-isbn");
+    if (!isbnInput || !fetchButton) return;
 
-    isbnInput.addEventListener("blur", async function () {
+    fetchButton.addEventListener("click", async function () {
         const isbn = isbnInput.value.trim();
         if (!isbn) return;
 
