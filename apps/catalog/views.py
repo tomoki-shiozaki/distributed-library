@@ -10,11 +10,13 @@ from apps.catalog.models import Book, Copy
 
 
 # Create your views here.
-class BookAndCopyCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
-    template_name = "catalog/book_form.html"
-
+class IsLibrarianMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_librarian
+
+
+class BookAndCopyCreateView(LoginRequiredMixin, IsLibrarianMixin, View):
+    template_name = "catalog/book_form.html"
 
     def get(self, request):
         book_form = BookForm()
@@ -32,28 +34,25 @@ class BookAndCopyCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
         book_form = BookForm(request.POST)
         copy_form = CopyForm(request.POST)
 
-        isbn = request.POST.get("isbn")
-        try:
-            book = Book.objects.get(isbn=isbn)
-            created = False
-            book_form_is_valid = True
-        except Book.DoesNotExist:
-            book = None
-            created = True
-            book_form_is_valid = book_form.is_valid()
+        book_form_valid = book_form.is_valid()
+        copy_form_valid = copy_form.is_valid()
 
-        copy_form_is_valid = copy_form.is_valid()
+        if book_form_valid and copy_form_valid:
+            isbn = book_form.cleaned_data["isbn"]
 
-        if book_form_is_valid and copy_form_is_valid:
+            # Bookを取得または作成
+            book, created = Book.objects.get_or_create(
+                isbn=isbn, defaults=book_form.cleaned_data
+            )
+
             with transaction.atomic():
-                if created:
-                    book = book_form.save()
                 copy = copy_form.save(commit=False)
                 copy.book = book
                 copy.save()
+
             return redirect("catalog:copy_confirm", copy.pk)
 
-        # エラーがあれば再表示
+        # エラーがある場合は再表示
         return render(
             request,
             self.template_name,
@@ -64,11 +63,8 @@ class BookAndCopyCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
         )
 
 
-class CopyConfirmView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+class CopyConfirmView(LoginRequiredMixin, IsLibrarianMixin, TemplateView):
     template_name = "catalog/copy_confirm.html"
-
-    def test_func(self):
-        return self.request.user.is_librarian
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
