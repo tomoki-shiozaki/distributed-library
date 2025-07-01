@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // 自動入力
             document.getElementById("id_title").value = info.title || "";
-            document.getElementById("id_author").value = (info.authors || []).join(", ");
+            document.getElementById("id_author").value = (info.authors || []).join(", ");// 著者がいればカンマ区切りで表示
             document.getElementById("id_publisher").value = info.publisher || "";
             document.getElementById("id_published_date").value = info.publishedDate || "";
             document.getElementById("id_image_url").value = info.imageLinks?.thumbnail || "";
@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 coverImg.style.display = "none";  // 非表示
             }
         } catch (err) {
-            console.error("APIエラー:", err);
             alert("本情報の取得に失敗しました。");
         }
     });
