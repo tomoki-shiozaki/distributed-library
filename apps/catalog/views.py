@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView
+from django.views.generic.edit import FormView
 from django.db import transaction
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
+from apps.catalog.forms import ISBNCheckForm
 from apps.catalog.forms import BookForm, CopyForm
 from apps.catalog.models import Book, Copy
 
@@ -13,6 +15,26 @@ from apps.catalog.models import Book, Copy
 class IsLibrarianMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_librarian
+
+
+class ISBNCheckView(LoginRequiredMixin, IsLibrarianMixin, FormView):
+    template_name = "catalog/isbn_check.html"
+    form_class = ISBNCheckForm
+
+    def form_valid(self, form):
+        isbn = form.cleaned_data["isbn"]
+        try:
+            book = Book.objects.get(isbn=isbn)
+            return redirect("catalog:copy_new", book_id=book.id)
+        except Book.DoesNotExist:
+            return redirect("book_create_from_isbn", isbn=isbn)
+
+
+class CopyCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
+    model = Copy
+    fields = ["location", "status"]
+    template_name = "catalog/copy_form.html"
+    success_url = reverse_lazy("home")
 
 
 class BookAndCopyCreateView(LoginRequiredMixin, IsLibrarianMixin, View):

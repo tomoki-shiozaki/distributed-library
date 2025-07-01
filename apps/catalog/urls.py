@@ -1,10 +1,17 @@
 from django.urls import path
 
-from apps.catalog.views import BookAndCopyCreateView, CopyConfirmView
+from apps.catalog.views import (
+    ISBNCheckView,
+    CopyCreateView,
+    BookAndCopyCreateView,
+    CopyConfirmView,
+)
 
 app_name = "catalog"
 
 urlpatterns = [
+    path("books/isbn-check/", ISBNCheckView.as_view(), name="isbn_check"),
+    path("copies/new/<int:book_id>/", CopyCreateView.as_view(), name="copy_new"),
     path("new/", BookAndCopyCreateView.as_view(), name="new"),
     path("copy/confirm/<int:pk>/", CopyConfirmView.as_view(), name="copy_confirm"),
 ]

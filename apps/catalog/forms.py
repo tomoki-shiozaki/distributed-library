@@ -3,6 +3,10 @@ from apps.catalog.models import Book, Copy
 
 
 # Create the form class.
+class ISBNCheckForm(forms.Form):
+    isbn = forms.CharField(label="ISBN", max_length=13)
+
+
 class BookForm(forms.ModelForm):
     class Meta:
         model = Book
