@@ -16,6 +16,11 @@ class BookForm(forms.ModelForm):
             "edition",
         ]
 
+    def clean_isbn(self):
+        isbn = self.cleaned_data["isbn"]
+        # 重複チェックを無視して通す（ビューで処理）
+        return isbn
+
 
 class CopyForm(forms.ModelForm):
     class Meta:
