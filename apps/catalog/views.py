@@ -1,9 +1,12 @@
+import requests
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView, CreateView
 from django.views.generic.edit import FormView
 from django.db import transaction
 from django.urls import reverse, reverse_lazy
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from apps.catalog.forms import ISBNCheckForm
@@ -42,6 +45,43 @@ class BookCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
         "edition",
     ]
     template_name = "catalog/book_form.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        isbn = self.kwargs.get("isbn")
+        if isbn:
+            # Google Books APIから情報取得
+            url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                if data["totalItems"] > 0:
+                    volume_info = data["items"][0]["volumeInfo"]
+                    # 初期値としてフォームに埋め込む
+                    initial.update(
+                        {
+                            "isbn": isbn,
+                            "title": volume_info.get("title", ""),
+                            "author": ", ".join(volume_info.get("authors", [])),
+                            "publisher": volume_info.get("publisher", ""),
+                            "published_date": volume_info.get("publishedDate", ""),
+                            "image_url": volume_info.get("imageLinks", {}).get(
+                                "thumbnail", ""
+                            ),
+                            "edition": volume_info.get(
+                                "contentVersion", ""
+                            ),  # 適切な変換が必要なら修正
+                        }
+                    )
+                else:
+                    messages.warning(
+                        self.request, f"ISBN {isbn} の書籍情報は見つかりませんでした。"
+                    )
+            else:
+                messages.error(
+                    self.request, "Google Books API からの情報取得に失敗しました。"
+                )
+        return initial
 
     def get_success_url(self):
         return reverse("catalog:copy_new", kwargs={"book_id": self.object.id})
