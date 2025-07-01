@@ -27,7 +27,24 @@ class ISBNCheckView(LoginRequiredMixin, IsLibrarianMixin, FormView):
             book = Book.objects.get(isbn=isbn)
             return redirect("catalog:copy_new", book_id=book.id)
         except Book.DoesNotExist:
-            return redirect("book_create_from_isbn", isbn=isbn)
+            return redirect("catalog:book_create_from_isbn", isbn=isbn)
+
+
+class BookCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
+    model = Book
+    fields = [
+        "isbn",
+        "title",
+        "author",
+        "publisher",
+        "published_date",
+        "image_url",
+        "edition",
+    ]
+    template_name = "catalog/book_form.html"
+
+    def get_success_url(self):
+        return reverse("catalog:copy_new", kwargs={"book_id": self.object.id})
 
 
 class CopyCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
@@ -36,9 +53,15 @@ class CopyCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
     template_name = "catalog/copy_form.html"
     success_url = reverse_lazy("home")
 
+    def form_valid(self, form):
+        book_id = self.kwargs.get("book_id")
+        book = get_object_or_404(Book, id=book_id)
+        form.instance.book = book
+        return super().form_valid(form)
+
 
 class BookAndCopyCreateView(LoginRequiredMixin, IsLibrarianMixin, View):
-    template_name = "catalog/book_form.html"
+    template_name = "catalog/book_form_old.html"
 
     def get(self, request):
         book_form = BookForm()
