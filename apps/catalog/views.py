@@ -92,11 +92,19 @@ class CopyCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
     template_name = "catalog/copy_form.html"
     success_url = reverse_lazy("home")
 
-    def form_valid(self, form):
+    def dispatch(self, request, *args, **kwargs):
         book_id = self.kwargs.get("book_id")
-        book = get_object_or_404(Book, id=book_id)
-        form.instance.book = book
+        self.book = get_object_or_404(Book, id=book_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.book = self.book
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["book"] = self.book
+        return context
 
 
 class BookAndCopyCreateView(LoginRequiredMixin, IsLibrarianMixin, View):

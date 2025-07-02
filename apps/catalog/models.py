@@ -49,6 +49,12 @@ class StorageLocation(models.Model):
         verbose_name_plural = "保存場所マスター"
 
 
+class CopyStatus(models.TextChoices):
+    AVAILABLE = "available", "貸出可能"
+    LOANED = "loaned", "貸出中"
+    DISCARDED = "discarded", "廃棄済み"
+
+
 class Copy(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE, verbose_name="書籍")
     location = models.ForeignKey(
@@ -56,12 +62,8 @@ class Copy(models.Model):
     )
     status = models.CharField(
         max_length=20,
-        choices=[
-            ("available", "貸出可能"),
-            ("loaned", "貸出中"),
-            ("lost", "廃棄済み"),
-        ],
-        verbose_name="ステータス",
+        choices=CopyStatus.choices,
+        verbose_name="状態",
     )
     registered_date = models.DateField(auto_now_add=True, verbose_name="登録日")
 
@@ -70,4 +72,4 @@ class Copy(models.Model):
 
     class Meta:
         verbose_name = "蔵書"
-        verbose_name_plural = "蔵書"
+        verbose_name_plural = "蔵書一覧"
