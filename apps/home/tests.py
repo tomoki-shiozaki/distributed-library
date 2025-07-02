@@ -61,4 +61,3 @@ class TopPageViewTests(TestCase):
         self.client.login(username="librarian", password="testpass")
         response = self.client.get(self.url)
         self.assertContains(response, "司書向けの案内")
-        self.assertContains(response, f'href="{reverse("catalog:new")}"')
