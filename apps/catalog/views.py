@@ -62,15 +62,14 @@ class BookCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
                         {
                             "isbn": isbn,
                             "title": volume_info.get("title", ""),
-                            "author": ", ".join(volume_info.get("authors", [])),
+                            "author": ", ".join(
+                                volume_info.get("authors", [])
+                            ),  # 複数の著者をカンマ区切りの文字列に変換
                             "publisher": volume_info.get("publisher", ""),
                             "published_date": volume_info.get("publishedDate", ""),
                             "image_url": volume_info.get("imageLinks", {}).get(
                                 "thumbnail", ""
                             ),
-                            "edition": volume_info.get(
-                                "contentVersion", ""
-                            ),  # 適切な変換が必要なら修正
                         }
                     )
                 else:

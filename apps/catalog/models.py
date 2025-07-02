@@ -3,16 +3,35 @@ from django.db import models
 
 # Create your models here.
 class Book(models.Model):
-    isbn = models.CharField(max_length=13, unique=True, verbose_name="ISBN")
+    isbn = models.CharField(
+        max_length=13,
+        unique=True,
+        verbose_name="ISBN",
+        help_text="13桁の数字をハイフンなしで入力してください。",
+    )
     title = models.CharField(max_length=255, verbose_name="タイトル")
     author = models.CharField(max_length=255, verbose_name="著者")
     publisher = models.CharField(max_length=255, verbose_name="出版社")
-    published_date = models.DateField(verbose_name="出版日")
-    image_url = models.URLField(blank=True, verbose_name="画像用リンク")
-    edition = models.PositiveIntegerField(verbose_name="版数")
+    published_date = models.DateField(
+        verbose_name="出版日",
+        help_text="YYYY-MM-DDの形式で入力してください。例：2025-01-01",
+    )
+    image_url = models.URLField(
+        blank=True,
+        verbose_name="画像用リンク",
+        help_text="書籍のカバー画像のURLを入力してください（任意）。",
+    )
+    edition = models.PositiveIntegerField(
+        verbose_name="版数",
+        blank=True,
+        null=True,
+        help_text="任意で数値を入力してください。例えば第2版なら「2」と入力してください。わからなければ空欄のままで構いません。",
+    )
 
     def __str__(self):
-        return f"{self.title}（第{self.edition}版）"
+        if self.edition:
+            return f"{self.title}（第{self.edition}版）"
+        return self.title
 
     class Meta:
         verbose_name = "本"
