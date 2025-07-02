@@ -2,7 +2,7 @@ import requests
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import CreateView, DetailView
 from django.views.generic.edit import FormView
 from django.db import transaction
 from django.urls import reverse, reverse_lazy
@@ -101,6 +101,9 @@ class CopyCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
         form.instance.book = self.book
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse("catalog:copy_confirm", kwargs={"pk": self.object.pk})
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["book"] = self.book
@@ -155,15 +158,7 @@ class BookAndCopyCreateView(LoginRequiredMixin, IsLibrarianMixin, View):
         )
 
 
-class CopyConfirmView(LoginRequiredMixin, IsLibrarianMixin, TemplateView):
+class CopyConfirmView(LoginRequiredMixin, IsLibrarianMixin, DetailView):
+    model = Copy
     template_name = "catalog/copy_confirm.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        pk = self.kwargs["pk"]
-        copy = get_object_or_404(Copy, pk=pk)
-        book = copy.book
-        context["copy"] = copy
-        context["book"] = book
-
-        return context
+    context_object_name = "copy"

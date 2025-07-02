@@ -1,40 +1,38 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% load static %}
-{% load crispy_forms_tags %}
+{% block title %}蔵書登録の確認{% endblock %}
 
-{% block title %}蔵書の登録確認{% endblock title %}
 {% block content %}
+<div class="container my-4">
+    <h1>蔵書の登録が完了しました</h1>
+    <p>以下の内容で蔵書が登録されました：</p>
 
+    <table class="table table-bordered mt-3">
+        <tr>
+            <th scope="row">書籍タイトル</th>
+            <td>{{ copy.book.title }}</td>
+        </tr>
+        <tr>
+            <th scope="row">著者</th>
+            <td>{{ copy.book.author }}</td>
+        </tr>
+        <tr>
+            <th scope="row">保存場所</th>
+            <td>{{ copy.location.name }}</td>
+        </tr>
+        <tr>
+            <th scope="row">状態</th>
+            <td>{{ copy.get_status_display }}</td>
+        </tr>
+        <tr>
+            <th scope="row">登録日</th>
+            <td>{{ copy.registered_date }}</td>
+        </tr>
+    </table>
 
-<h1>蔵書が登録されました</h1>
-<div class="card mb-3">
-    {% if book.image_url %}
-    <img src="{{ book.image_url }}" class="card-img-top"
-        style="max-height: 300px; width: auto; height: auto; object-fit: contain;">
-    {% endif %}
-    <div class="card-body">
-        <h5 class="card-title">{{ book.title }}</h5>
-        <p class="card-text">著者: {{ book.author }}</p>
-        <p class="card-text">出版社: {{ book.publisher }}</p>
-        <p class="card-text">出版日: {{ book.published_date }}</p>
-        <p class="card-text">ISBN: {{ book.isbn }}</p>
+    <div class="mt-4">
+        <a href="{% url 'catalog:isbn_check' %}" class="btn btn-outline-primary">さらに蔵書を登録する</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary ml-2">ホームに戻る</a>
     </div>
 </div>
-
-<h4>登録された蔵書</h4>
-<ul>
-    <li><strong>保存場所:</strong> {{ copy.location.name }}</li>
-    <li><strong>状態:</strong> {{ copy.get_status_display }}</li>
-    <!-- その他のCopy情報を表示 -->
-</ul>
-
-<div class="mt-3">
-    <a href="{% url 'home' %}" class="btn btn-primary">ホームに戻る</a>
-    <a href="{% url 'catalog:new' %}" class="btn btn-secondary">さらに蔵書を追加</a>
-</div>
-
-
-
-{% endblock content %}
-
+{% endblock %}

@@ -17,5 +17,5 @@ urlpatterns = [
     ),
     path("copies/new/<int:book_id>/", CopyCreateView.as_view(), name="copy_new"),
     path("new/", BookAndCopyCreateView.as_view(), name="new"),
-    path("copy/confirm/<int:pk>/", CopyConfirmView.as_view(), name="copy_confirm"),
+    path("copies/<int:pk>/confirm/", CopyConfirmView.as_view(), name="copy_confirm"),
 ]
