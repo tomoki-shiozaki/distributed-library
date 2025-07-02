@@ -24,6 +24,13 @@
             </p>
         </div>
     </div>
+    {% else %}
+    <div class="alert alert-warning my-4">
+        <p class="mb-0">
+            書籍情報がGoogle Books APIから取得できませんでした。手動で必要な情報を入力してください。<br>
+            正確な情報を入力いただくことで、後の蔵書管理がスムーズになります。
+        </p>
+    </div>
     {% endif %}
 
     <form action="" method="post" class="mb-5">
