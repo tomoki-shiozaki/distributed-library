@@ -3,18 +3,36 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}本の登録{% endblock title %}
+{% block title %}蔵書の登録 - 書籍情報の登録{% endblock title %}
 {% block content %}
 
+<div class="container my-4">
 
-<h1>本の登録</h1>
-<form action="" method="post">{% csrf_token %}
-    {{ form|crispy }}
+    <h1 class="mb-4">蔵書の登録 - 書籍情報を登録してください</h1>
+    <h2 class="h5 text-secondary mb-4">本アプリには、この書籍は未登録でした。書籍の基本情報を入力してください。</h2>
 
-    <!-- 書影用の要素をフォームの近くに追加 -->
-    <img id="book-cover" src="" alt="書影" style="max-width: 200px; margin-top: 10px; display: none;">
+    <!-- 書影表示（初期表示 or JavaScriptで動的更新） -->
+    {% if form.initial.image_url %}
+    <div class="mb-4 d-flex align-items-start">
+        <img id="book-cover" src="{{ form.initial.image_url }}" alt="{{ form.initial.title }}の書影"
+            class="img-fluid rounded border shadow-sm" style="max-width: 200px; margin-right: 20px;">
+        <div>
+            <p class="text-muted small mb-1">※ Google Books API より取得された書影です</p>
+            <p class="text-muted small">
+                表示された情報を確認し、必要に応じて修正してください。<br>
+                正しい情報を登録することで、後からの蔵書管理がスムーズになります。
+            </p>
+        </div>
+    </div>
+    {% endif %}
 
-    <button class="btn btn-success ml-2" type="submit">本の登録</button>
-</form>
+    <form action="" method="post" class="mb-5">
+        {% csrf_token %}
+        {{ form|crispy }}
+
+        <button class="btn btn-success mt-3" type="submit">書籍の基本情報の登録</button>
+    </form>
+
+</div>
 
 {% endblock content %}
