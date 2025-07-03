@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from apps.catalog.models import Book
+from apps.catalog.models import Book, Copy
 
 User = get_user_model()
 LIBRARIAN = User.UserRole.LIBRARIAN
@@ -156,3 +156,55 @@ class TestBookCreateView(TestCase):
         )
         self.assertEqual(book.title, "New Title")
         self.assertEqual(book.edition, 2)
+
+
+class TestCopyCreateView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.librarian = User.objects.create_user(
+            username="lib", password="pass", role=LIBRARIAN
+        )
+        cls.general = User.objects.create_user(
+            username="gen", password="pass", role=GENERAL
+        )
+        cls.book = Book.objects.create(
+            isbn="1234567890123",
+            title="Test Book",
+            author="Author",
+            publisher="Pub",
+            published_date=datetime.date(2024, 1, 1),
+            edition=1,
+        )
+
+    def test_redirect_if_not_logged_in(self):
+        url = reverse("catalog:copy_new", kwargs={"book_id": self.book.id})
+        response = self.client.get(url)
+        self.assertRedirects(response, f"/accounts/login/?next={url}")
+
+    def test_general_user_forbidden(self):
+        self.client.login(username="gen", password="pass")
+        url = reverse("catalog:copy_new", kwargs={"book_id": self.book.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_librarian_can_access_and_sees_book_in_context(self):
+        self.client.login(username="lib", password="pass")
+        url = reverse("catalog:copy_new", kwargs={"book_id": self.book.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("book", response.context)
+        self.assertEqual(response.context["book"], self.book)
+
+    def test_post_creates_copy_and_redirects(self):
+        self.client.login(username="lib", password="pass")
+        url = reverse("catalog:copy_new", kwargs={"book_id": self.book.id})
+        data = {"location": "A1", "status": Copy.CopyStatus.AVAILABLE}
+        response = self.client.post(url, data)
+
+        copy = Copy.objects.get(book=self.book)
+        self.assertEqual(copy.location, "A1")
+        self.assertEqual(copy.status, Copy.CopyStatus.AVAILABLE)
+
+        self.assertRedirects(
+            response, reverse("catalog:copy_confirm", kwargs={"pk": copy.pk})
+        )
