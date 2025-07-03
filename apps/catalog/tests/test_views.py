@@ -12,14 +12,15 @@ GENERAL = User.UserRole.GENERAL
 
 
 class TestISBNCheckView(TestCase):
-    def setUp(self):
-        self.librarian = User.objects.create_user(
+    @classmethod
+    def setUpTestData(cls):
+        cls.librarian = User.objects.create_user(
             username="lib", password="pass", role=LIBRARIAN
         )
-        self.general = User.objects.create_user(
+        cls.general = User.objects.create_user(
             username="gen", password="pass", role=GENERAL
         )
-        self.book = Book.objects.create(
+        cls.book = Book.objects.create(
             isbn="1234567890123",
             title="hogehoge",
             author="hugahuga",
