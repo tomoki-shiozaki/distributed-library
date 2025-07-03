@@ -2,12 +2,12 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.test.client import Client
-from apps.accounts.models import CustomUser
 
+from apps.accounts.models import CustomUser
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
-GENERAL = CustomUser.GENERAL
-LIBRARIAN = CustomUser.LIBRARIAN
+GENERAL = CustomUser.UserRole.GENERAL
+LIBRARIAN = CustomUser.UserRole.LIBRARIAN
 
 
 # Create your tests here.
@@ -129,13 +129,13 @@ class CustomUserModelTest(TestCase):
         user = get_user_model().objects.create_user(
             username="testuser", password="password123"
         )
-        self.assertEqual(user.role, get_user_model().GENERAL)
+        self.assertEqual(user.role, GENERAL)
 
     def test_all_valid_values(self):
         User = get_user_model()
         for role in [
-            User.GENERAL,
-            User.LIBRARIAN,
+            GENERAL,
+            LIBRARIAN,
         ]:
             user = User.objects.create_user(
                 username=f"testuser_{role}", password="password123", role=role

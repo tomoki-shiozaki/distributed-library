@@ -3,8 +3,8 @@ from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 from apps.accounts.models import CustomUser
 
-GENERAL = CustomUser.GENERAL
-LIBRARIAN = CustomUser.LIBRARIAN
+GENERAL = CustomUser.UserRole.GENERAL
+LIBRARIAN = CustomUser.UserRole.LIBRARIAN
 
 
 # Create your tests here.
