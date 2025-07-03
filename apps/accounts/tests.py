@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.test.client import Client
 
 from apps.accounts.models import CustomUser
 from .forms import CustomUserCreationForm, CustomUserChangeForm
@@ -12,16 +11,16 @@ LIBRARIAN = CustomUser.UserRole.LIBRARIAN
 
 # Create your tests here.
 class CustomUserAdminTest(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         # テスト用のスーパーユーザーを作成
-        self.admin_user = get_user_model().objects.create_superuser(
+        cls.admin_user = get_user_model().objects.create_superuser(
             username="admin",
             email="admin@example.com",
             password="password123",
         )
 
-        # クライアントでログイン
-        self.client = Client()
+    def setUp(self):
         self.client.login(username="admin", password="password123")
 
     def test_user_role_display_in_admin(self):

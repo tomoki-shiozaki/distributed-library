@@ -7,8 +7,9 @@ from apps.catalog.models import Book, StorageLocation, CopyStatus, Copy
 
 # Create your tests here.
 class TestBookModel(TestCase):
-    def setUp(self):
-        self.book = Book.objects.create(
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = Book.objects.create(
             isbn="1234567890123",
             title="hogehoge",
             author="hugahuga",
@@ -46,8 +47,9 @@ class TestStorageLocationModel(TestCase):
 
 class TestCopyModel(TestCase):
 
-    def setUp(self):
-        self.book = Book.objects.create(
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = Book.objects.create(
             isbn="1234567890123",
             title="hogehoge",
             author="hugahuga",
@@ -56,7 +58,7 @@ class TestCopyModel(TestCase):
             image_url="https://example.jp/1234567890123.jpg",
             edition=1,
         )
-        self.location = StorageLocation.objects.create(name="第1書庫")
+        cls.location = StorageLocation.objects.create(name="第1書庫")
 
     def test_create_copy(self):
         copy = Copy.objects.create(
