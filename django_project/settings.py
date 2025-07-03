@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "apps.user_libraries.apps.UserLibrariesConfig",
     "apps.library.apps.LibraryConfig",
     "apps.catalog.apps.CatalogConfig",
+    "apps.core.apps.CoreConfig",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

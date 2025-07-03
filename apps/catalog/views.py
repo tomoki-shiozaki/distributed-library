@@ -7,19 +7,15 @@ from django.views.generic.edit import FormView
 from django.db import transaction
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 
+from apps.core.mixins import IsLibrarianMixin
 from apps.catalog.forms import ISBNCheckForm
 from apps.catalog.forms import BookForm, CopyForm
 from apps.catalog.models import Book, Copy
 
 
 # Create your views here.
-class IsLibrarianMixin(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_librarian
-
-
 class ISBNCheckView(LoginRequiredMixin, IsLibrarianMixin, FormView):
     template_name = "catalog/isbn_check.html"
     form_class = ISBNCheckForm
