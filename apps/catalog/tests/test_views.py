@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import patch, Mock
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
@@ -64,3 +65,94 @@ class TestISBNCheckView(TestCase):
             response,
             reverse("catalog:book_create_from_isbn", kwargs={"isbn": "9999999"}),
         )
+
+
+class TestBookCreateView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.librarian = User.objects.create_user(
+            username="lib", password="pass", role=LIBRARIAN
+        )
+
+    def setUp(self):
+        self.client.login(username="lib", password="pass")
+
+    @patch("apps.catalog.views.requests.get")
+    def test_get_initial_with_valid_isbn(self, mock_get):
+        isbn = "1234567890"
+        mock_resp = Mock(status_code=200)
+        mock_resp.json.return_value = {
+            "totalItems": 1,
+            "items": [
+                {
+                    "volumeInfo": {
+                        "title": "Test Book",
+                        "authors": ["Author1", "Author2"],
+                        "publisher": "Pub",
+                        "publishedDate": "2020-01-01",
+                        "imageLinks": {"thumbnail": "http://image.jpg"},
+                    }
+                }
+            ],
+        }
+        mock_get.return_value = mock_resp
+
+        response = self.client.get(
+            reverse("catalog:book_create_from_isbn", kwargs={"isbn": isbn})
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        initial = form.initial
+        self.assertEqual(initial["isbn"], isbn)
+        self.assertEqual(initial["title"], "Test Book")
+        self.assertIn("Author1, Author2", initial["author"])
+        self.assertEqual(initial["publisher"], "Pub")
+        self.assertEqual(initial["published_date"], "2020-01-01")
+        self.assertEqual(initial["image_url"], "http://image.jpg")
+
+    @patch("apps.catalog.views.requests.get")
+    def test_get_initial_with_no_items(self, mock_get):
+        isbn = "0000000"
+        mock_resp = Mock(status_code=200)
+        mock_resp.json.return_value = {"totalItems": 0}
+        mock_get.return_value = mock_resp
+
+        response = self.client.get(
+            reverse("catalog:book_create_from_isbn", kwargs={"isbn": isbn})
+        )
+        storage = list(response.context["messages"])
+        self.assertTrue(any("見つかりません" in m.message for m in storage))
+
+    @patch("apps.catalog.views.requests.get")
+    def test_get_initial_with_api_error(self, mock_get):
+        isbn = "error"
+        mock_resp = Mock(status_code=500)
+        mock_get.return_value = mock_resp
+
+        response = self.client.get(
+            reverse("catalog:book_create_from_isbn", kwargs={"isbn": isbn})
+        )
+        storage = list(response.context["messages"])
+        self.assertTrue(any("失敗しました" in m.message for m in storage))
+
+    def test_post_creates_book_and_redirects(self):
+        isbn = "1112223334445"
+        data = {
+            "isbn": isbn,
+            "title": "New Title",
+            "author": "A B",
+            "publisher": "Pub",
+            "published_date": "2025-01-01",
+            "image_url": "http://example.com/image.jpg",
+            "edition": 2,
+        }
+        response = self.client.post(
+            reverse("catalog:book_create_from_isbn", kwargs={"isbn": isbn}), data=data
+        )
+        # Book が作成され、正しいリダイレクト先へ
+        book = Book.objects.get(isbn=isbn)
+        self.assertRedirects(
+            response, reverse("catalog:copy_new", kwargs={"book_id": book.id})
+        )
+        self.assertEqual(book.title, "New Title")
+        self.assertEqual(book.edition, 2)
