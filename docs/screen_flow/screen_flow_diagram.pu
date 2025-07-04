@@ -23,13 +23,19 @@ end legend
     login --> librarian : 司書がログインする
 
 
-state "司書利用メニュー\n 本の登録" as bookManagement #LightGreen {
-    state "本の登録画面\n ISBNを入力し、本のデータを取得\n 保存場所や版数は手入力する" as bookRegistration <<操作>>
+state "司書利用メニュー\n 蔵書の登録" as bookManagement #LightGreen {
+    state "ISBNを入力する画面\n アプリのDBに書籍が登録されているかを確認する" as isbnCheckForm <<操作>>
+    state "書籍を登録する画面\n APIで書籍データを自動で取得する" as bookCreate <<操作>>
+    state "蔵書を登録する画面\n 保存場所、状態を入力する" as copyCreate <<操作>>
+    state "登録した蔵書を確認する画面\n 書影、タイトル、保存場所などを確認する" as copyConfirm <<表示>>
 }
-librarian --> bookRegistration
-bookRegistration --> librarian : 登録完了
-
-
+librarian --> isbnCheckForm
+isbnCheckForm --> bookCreate : 書籍がDBに未登録の場合
+isbnCheckForm --> copyCreate : 書籍がDBに登録済みの場合
+bookCreate --> copyCreate : 書籍登録後
+copyCreate --> copyConfirm
+copyConfirm --> librarian
+copyConfirm --> isbnCheckForm : 蔵書を続けて登録する場合
 
 state "一般ユーザー利用メニュー\n 本の検索・貸出・予約および返却・予約取り消し" as bookUse #LightBlue {
     state "蔵書の検索画面\n タイトル、著者名を入力する" as bookSearch <<検索>> 

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}蔵書登録の確認{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>蔵書の登録が完了しました</h1>
+    <p>以下の内容で蔵書が登録されました：</p>
+
+    <table class="table table-bordered mt-3">
+        <tr>
+            <th scope="row">書籍タイトル</th>
+            <td>{{ copy.book.title }}</td>
+        </tr>
+        <tr>
+            <th scope="row">著者</th>
+            <td>{{ copy.book.author }}</td>
+        </tr>
+        <tr>
+            <th scope="row">保存場所</th>
+            <td>{{ copy.location.name }}</td>
+        </tr>
+        <tr>
+            <th scope="row">状態</th>
+            <td>{{ copy.get_status_display }}</td>
+        </tr>
+        <tr>
+            <th scope="row">登録日</th>
+            <td>{{ copy.registered_date }}</td>
+        </tr>
+    </table>
+
+    <div class="mt-4">
+        <a href="{% url 'catalog:isbn_check' %}" class="btn btn-outline-primary">さらに蔵書を登録する</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary ml-2">ホームに戻る</a>
+    </div>
+</div>
+{% endblock %}

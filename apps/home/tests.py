@@ -3,8 +3,8 @@ from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 from apps.accounts.models import CustomUser
 
-GENERAL = CustomUser.GENERAL
-LIBRARIAN = CustomUser.LIBRARIAN
+GENERAL = CustomUser.UserRole.GENERAL
+LIBRARIAN = CustomUser.UserRole.LIBRARIAN
 
 
 # Create your tests here.
@@ -61,4 +61,3 @@ class TopPageViewTests(TestCase):
         self.client.login(username="librarian", password="testpass")
         response = self.client.get(self.url)
         self.assertContains(response, "司書向けの案内")
-        self.assertContains(response, f'href="{reverse("catalog:new")}"')
