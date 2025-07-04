@@ -50,7 +50,7 @@ class StorageLocation(models.Model):
 
 
 class Copy(models.Model):
-    class CopyStatus(models.TextChoices):
+    class Status(models.TextChoices):
         AVAILABLE = "available", "貸出可能"
         LOANED = "loaned", "貸出中"
         DISCARDED = "discarded", "廃棄済み"
@@ -61,7 +61,7 @@ class Copy(models.Model):
     )
     status = models.CharField(
         max_length=20,
-        choices=CopyStatus.choices,
+        choices=Status.choices,
         verbose_name="状態",
     )
     registered_date = models.DateField(auto_now_add=True, verbose_name="登録日")
@@ -71,4 +71,4 @@ class Copy(models.Model):
 
     class Meta:
         verbose_name = "蔵書"
-        verbose_name_plural = "蔵書一覧"
+        verbose_name_plural = "蔵書"

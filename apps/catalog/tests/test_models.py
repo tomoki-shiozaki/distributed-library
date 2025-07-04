@@ -2,7 +2,7 @@ from django.test import TestCase
 import datetime
 from django.utils import timezone
 
-from apps.catalog.models import Book, StorageLocation, CopyStatus, Copy
+from apps.catalog.models import Book, StorageLocation, Copy
 
 
 # Create your tests here.
@@ -62,17 +62,17 @@ class TestCopyModel(TestCase):
 
     def test_create_copy(self):
         copy = Copy.objects.create(
-            book=self.book, location=self.location, status=CopyStatus.AVAILABLE
+            book=self.book, location=self.location, status=Copy.Status.AVAILABLE
         )
         self.assertEqual(copy.book.title, "hogehoge")
         self.assertEqual(copy.location.name, "第1書庫")
-        self.assertEqual(copy.status, CopyStatus.AVAILABLE)
+        self.assertEqual(copy.status, Copy.Status.AVAILABLE)
         self.assertEqual(copy._meta.verbose_name, "蔵書")
-        self.assertEqual(copy._meta.verbose_name_plural, "蔵書一覧")
+        self.assertEqual(copy._meta.verbose_name_plural, "蔵書")
         self.assertIsNotNone(copy.registered_date)
-        self.assertEqual(copy.registered_date, timezone.now().date())
+        self.assertEqual(copy.registered_date, datetime.date.today())
 
     def test_status_choices(self):
-        valid_statuses = dict(CopyStatus.choices)
-        for key in [CopyStatus.AVAILABLE, CopyStatus.LOANED, CopyStatus.DISCARDED]:
+        valid_statuses = dict(Copy.Status.choices)
+        for key in [Copy.Status.AVAILABLE, Copy.Status.LOANED, Copy.Status.DISCARDED]:
             self.assertIn(key, valid_statuses)

@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from apps.catalog.models import Book, Copy
+from apps.catalog.models import Book, StorageLocation, Copy
 
 User = get_user_model()
 LIBRARIAN = User.UserRole.LIBRARIAN
@@ -175,6 +175,7 @@ class TestCopyCreateView(TestCase):
             published_date=datetime.date(2024, 1, 1),
             edition=1,
         )
+        cls.location = StorageLocation.objects.create(name="第1書庫")
 
     def test_redirect_if_not_logged_in(self):
         url = reverse("catalog:copy_new", kwargs={"book_id": self.book.id})
@@ -198,12 +199,12 @@ class TestCopyCreateView(TestCase):
     def test_post_creates_copy_and_redirects(self):
         self.client.login(username="lib", password="pass")
         url = reverse("catalog:copy_new", kwargs={"book_id": self.book.id})
-        data = {"location": "A1", "status": Copy.CopyStatus.AVAILABLE}
+        data = {"location": self.location.id, "status": Copy.Status.AVAILABLE}
         response = self.client.post(url, data)
 
         copy = Copy.objects.get(book=self.book)
-        self.assertEqual(copy.location, "A1")
-        self.assertEqual(copy.status, Copy.CopyStatus.AVAILABLE)
+        self.assertEqual(copy.location, self.location)
+        self.assertEqual(copy.status, Copy.Status.AVAILABLE)
 
         self.assertRedirects(
             response, reverse("catalog:copy_confirm", kwargs={"pk": copy.pk})
