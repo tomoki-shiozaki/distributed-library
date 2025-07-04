@@ -5,5 +5,5 @@ from apps.library.views import BookSearchView
 app_name = "library"
 
 urlpatterns = [
-    path("search", BookSearchView.as_view(), name="search"),
+    path("books/search", BookSearchView.as_view(), name="book_search"),
 ]

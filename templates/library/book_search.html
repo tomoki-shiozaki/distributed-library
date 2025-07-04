@@ -4,5 +4,30 @@
 {% block content %}
 
 <h1>本の検索</h1>
+<form method="get">
+    {{ form.q.label_tag }} {{ form.q }}
+    <button type="submit">検索</button>
+</form>
+
+<ul>
+    {% for book in books %}
+    <li>{{ book.title }}</li>
+    {% empty %}
+    <li>該当する本は見つかりませんでした。</li>
+    {% endfor %}
+</ul>
+
+<!-- ページネーション -->
+{% if is_paginated %}
+<div>
+    {% if page_obj.has_previous %}
+    <a href="?q={{ form.q.value }}&page={{ page_obj.previous_page_number }}">前へ</a>
+    {% endif %}
+    <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?q={{ form.q.value }}&page={{ page_obj.next_page_number }}">次へ</a>
+    {% endif %}
+</div>
+{% endif %}
 
 {% endblock content %}
