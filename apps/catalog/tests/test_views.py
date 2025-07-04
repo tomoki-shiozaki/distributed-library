@@ -209,3 +209,48 @@ class TestCopyCreateView(TestCase):
         self.assertRedirects(
             response, reverse("catalog:copy_confirm", kwargs={"pk": copy.pk})
         )
+
+
+class TestCopyConfirmView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.librarian = User.objects.create_user(
+            username="lib", password="pass", role=LIBRARIAN
+        )
+        cls.general = User.objects.create_user(
+            username="gen", password="pass", role=GENERAL
+        )
+        cls.book = Book.objects.create(
+            isbn="1234567890123",
+            title="Test Book",
+            author="Author",
+            publisher="Pub",
+            published_date=datetime.date(2024, 1, 1),
+            edition=1,
+        )
+        cls.location = StorageLocation.objects.create(name="第1書庫")
+        cls.copy = Copy.objects.create(
+            book=cls.book,
+            location=cls.location,
+            status=Copy.Status.AVAILABLE,
+        )
+        cls.url = reverse("catalog:copy_confirm", kwargs={"pk": cls.copy.pk})
+
+    def test_redirect_if_not_logged_in(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"/accounts/login/?next={self.url}")
+
+    def test_general_user_forbidden(self):
+        self.client.login(username="gen", password="pass")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_librarian_can_access(self):
+        self.client.login(username="lib", password="pass")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_context_contains_copy(self):
+        self.client.login(username="lib", password="pass")
+        response = self.client.get(self.url)
+        self.assertEqual(response.context["copy"], self.copy)

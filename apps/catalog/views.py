@@ -86,7 +86,6 @@ class CopyCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
     model = Copy
     fields = ["location", "status"]
     template_name = "catalog/copy_form.html"
-    success_url = reverse_lazy("home")
 
     def dispatch(self, request, *args, **kwargs):
         book_id = self.kwargs.get("book_id")
