@@ -2,4 +2,6 @@ from django import forms
 
 
 class BookSearchForm(forms.Form):
-    q = forms.CharField(label="キーワード", required=False)
+    title = forms.CharField(label="タイトル", required=False)
+    author = forms.CharField(label="著者名", required=False)
+    publisher = forms.CharField(label="出版社", required=False)

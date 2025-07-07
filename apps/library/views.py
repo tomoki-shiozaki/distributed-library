@@ -15,10 +15,21 @@ class BookSearchView(ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         self.form = BookSearchForm(self.request.GET)
+
+        # 初期表示（クエリなし）は空クエリセットを返す
+        if not self.request.GET:
+            return queryset.none()
+
         if self.form.is_valid():
-            q = self.form.cleaned_data.get("q")
-            if q:
-                queryset = queryset.filter(title__icontains=q)
+            title = self.form.cleaned_data.get("title")
+            author = self.form.cleaned_data.get("author")
+            publisher = self.form.cleaned_data.get("publisher")
+            if title:
+                queryset = queryset.filter(title__icontains=title)
+            if author:
+                queryset = queryset.filter(author__icontains=author)
+            if publisher:
+                queryset = queryset.filter(publisher__icontains=publisher)
         return queryset
 
     def get_context_data(self, **kwargs):
