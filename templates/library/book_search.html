@@ -3,31 +3,88 @@
 {% block title %}本の検索{% endblock title %}
 {% block content %}
 
-<h1>本の検索</h1>
+<h1>本の検索 - タイトルを入力してください</h1>
 <form method="get">
     {{ form.q.label_tag }} {{ form.q }}
     <button type="submit">検索</button>
 </form>
 
-<ul>
-    {% for book in books %}
-    <li>{{ book.title }}</li>
-    {% empty %}
-    <li>該当する本は見つかりませんでした。</li>
-    {% endfor %}
-</ul>
+{% if form.q.value %}
+{% if books %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>タイトル</th>
+                <th>著者</th>
+                <th>出版日</th>
+                <th>出版社</th>
+                <th>詳細</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.author }}</td>
+                <td>{{ book.published_date }}</td>
+                <td>{{ book.publisher }}</td>
+                <td><a href="" class="btn btn-sm btn-outline-primary">詳細</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <!-- ページネーション -->
 {% if is_paginated %}
-<div>
-    {% if page_obj.has_previous %}
-    <a href="?q={{ form.q.value }}&page={{ page_obj.previous_page_number }}">前へ</a>
-    {% endif %}
-    <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-    {% if page_obj.has_next %}
-    <a href="?q={{ form.q.value }}&page={{ page_obj.next_page_number }}">次へ</a>
-    {% endif %}
-</div>
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?q={{ form.q.value }}&page=1" aria-label="First">
+                <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?q={{ form.q.value }}&page={{ page_obj.previous_page_number }}"
+                aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">&laquo;&laquo;</span></li>
+        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?q={{ form.q.value }}&page={{ page_obj.next_page_number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?q={{ form.q.value }}&page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        <li class="page-item disabled"><span class="page-link">&raquo;&raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<p>該当する本は見つかりませんでした。</p>
+{% endif %}
 {% endif %}
 
 {% endblock content %}

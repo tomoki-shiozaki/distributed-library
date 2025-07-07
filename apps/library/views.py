@@ -10,7 +10,7 @@ class BookSearchView(ListView):
     model = Book
     template_name = "library/book_search.html"
     context_object_name = "books"
-    paginate_by = 2
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset()
