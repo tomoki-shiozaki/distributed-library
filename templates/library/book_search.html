@@ -27,6 +27,7 @@
                 <th>著者</th>
                 <th>出版社</th>
                 <th>出版日</th>
+                <th>貸出状態</th>
                 <th>詳細</th>
             </tr>
         </thead>
@@ -37,6 +38,15 @@
                 <td>{{ book.author }}</td>
                 <td>{{ book.publisher }}</td>
                 <td>{{ book.published_date }}</td>
+                <td>
+                    {% if book.available_count > 0 %}
+                    <span class="badge bg-success">貸出可能 </span>
+                    {% elif book.loaned_count > 0 %}
+                    <span class="badge bg-warning">貸出中 </span>
+                    {% else %}
+                    <span class="badge bg-secondary">貸出不可</span>
+                    {% endif %}
+                </td>
                 <td><a href="" class="btn btn-sm btn-outline-primary">詳細</a></td>
             </tr>
             {% endfor %}

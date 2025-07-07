@@ -1,7 +1,8 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView, ListView
+from django.views.generic import ListView
+from django.db.models import Count, Q
 
-from apps.catalog.models import Book
+from apps.catalog.models import Book, Copy
 from apps.library.forms import BookSearchForm
 
 
@@ -30,6 +31,13 @@ class BookSearchView(ListView):
                 queryset = queryset.filter(author__icontains=author)
             if publisher:
                 queryset = queryset.filter(publisher__icontains=publisher)
+
+        # 各本に貸出可能なコピーの数を追加
+        queryset = queryset.annotate(
+            available_count=Count("copy", filter=Q(copy__status=Copy.Status.AVAILABLE)),
+            loaned_count=Count("copy", filter=Q(copy__status=Copy.Status.LOANED)),
+        )
+
         return queryset
 
     def get_context_data(self, **kwargs):
