@@ -25,12 +25,16 @@ class BookSearchView(ListView):
             title = self.form.cleaned_data.get("title")
             author = self.form.cleaned_data.get("author")
             publisher = self.form.cleaned_data.get("publisher")
+            isbn = self.form.cleaned_data.get("isbn")
+
             if title:
                 queryset = queryset.filter(title__icontains=title)
             if author:
                 queryset = queryset.filter(author__icontains=author)
             if publisher:
                 queryset = queryset.filter(publisher__icontains=publisher)
+            if isbn:
+                queryset = queryset.filter(isbn__icontains=isbn)
 
         # 各本に貸出可能なコピーの数を追加
         queryset = queryset.annotate(
