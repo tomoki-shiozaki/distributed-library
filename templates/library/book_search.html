@@ -61,7 +61,7 @@
                     <span class="badge bg-secondary">貸出不可</span>
                     {% endif %}
                 </td>
-                <td><a href="" class="btn btn-sm btn-primary">詳細</a></td>
+                <td><a href="{% url 'library:book_detail' book.pk %}" class="btn btn-sm btn-primary">詳細</a></td>
             </tr>
             {% endfor %}
         </tbody>

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.db.models import Count, Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -50,3 +50,8 @@ class BookSearchView(LoginRequiredMixin, IsGeneralMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["form"] = self.form
         return context
+
+
+class BookDetailView(LoginRequiredMixin, IsGeneralMixin, DetailView):
+    model = Book
+    template_name = "library/book_detail.html"
