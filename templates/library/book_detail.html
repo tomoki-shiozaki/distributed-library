@@ -3,10 +3,36 @@
 {% block title %}本の詳細・貸出状況{% endblock title %}
 {% block content %}
 
-<h1>本の詳細・貸出状況</h1>
-<h2 class="mb-4">本の詳細・貸出情報</h2>
-<p class="lead">
+<h1>{{ book.title }}</h1>
+<p><strong>著者：</strong>{{ book.author }}</p>
+<p><strong>出版社：</strong>{{ book.publisher }}</p>
+<p><strong>出版日：</strong>{{ book.published_date }}</p>
+<p><strong>ISBN：</strong>{{ book.isbn }}</p>
+<img src="{{ book.image_url }}" alt="表紙画像" />
+<p><strong>あらすじ：</strong>{{ book.description }}</p>
 
-</p>
+<h2>蔵書一覧</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>保存場所</th>
+            <th>状態</th>
+            <th>登録日</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for copy in copies %}
+        <tr>
+            <td>{{ copy.location.name }}</td>
+            <td>{{ copy.get_status_display }}</td>
+            <td>{{ copy.registered_date }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">この本の蔵書はありません。</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 {% endblock content %}
