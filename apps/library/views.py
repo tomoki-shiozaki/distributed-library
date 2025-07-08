@@ -1,13 +1,15 @@
 from django.shortcuts import render
 from django.views.generic import ListView
 from django.db.models import Count, Q
+from django.contrib.auth.mixins import LoginRequiredMixin
 
+from apps.core.mixins import IsGeneralMixin
 from apps.catalog.models import Book, Copy
 from apps.library.forms import BookSearchForm
 
 
 # Create your views here.
-class BookSearchView(ListView):
+class BookSearchView(LoginRequiredMixin, IsGeneralMixin, ListView):
     model = Book
     template_name = "library/book_search.html"
     context_object_name = "books"
