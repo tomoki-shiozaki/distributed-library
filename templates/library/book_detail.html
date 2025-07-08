@@ -9,7 +9,7 @@
 <p><strong>出版日：</strong>{{ book.published_date }}</p>
 <p><strong>ISBN：</strong>{{ book.isbn }}</p>
 <img src="{{ book.image_url }}" alt="表紙画像" />
-<p><strong>あらすじ：</strong>{{ book.description }}</p>
+<p><strong>内容紹介：</strong>{{ book.description|linebreaks }}</p>
 
 <h2>蔵書一覧</h2>
 <table class="table">
