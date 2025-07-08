@@ -36,6 +36,7 @@ class BookCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
         "published_date",
         "image_url",
         "edition",
+        "description",
     ]
     template_name = "catalog/book_form.html"
 
@@ -63,6 +64,7 @@ class BookCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
                             "image_url": volume_info.get("imageLinks", {}).get(
                                 "thumbnail", ""
                             ),
+                            "description": volume_info.get("description", ""),
                         }
                     )
                 else:

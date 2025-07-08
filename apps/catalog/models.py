@@ -27,6 +27,11 @@ class Book(models.Model):
         null=True,
         help_text="任意で数値を入力してください。例えば第2版なら「2」と入力してください。わからなければ空欄のままで構いません。",
     )
+    description = models.TextField(
+        verbose_name="内容紹介",
+        blank=True,
+        help_text="本の概要や見どころなどを、利用者向けに簡単に説明してください（任意）。",
+    )
 
     def __str__(self):
         if self.edition:
