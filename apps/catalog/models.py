@@ -3,6 +3,12 @@ from django.db import models
 
 # Create your models here.
 class Book(models.Model):
+    class PublishedDatePrecision(models.TextChoices):
+        UNKNOWN = "unknown", "不明"
+        YEAR = "year", "年"
+        MONTH = "month", "年月"
+        DAY = "day", "年月日"
+
     isbn = models.CharField(
         max_length=13,
         unique=True,
@@ -15,6 +21,25 @@ class Book(models.Model):
     published_date = models.DateField(
         verbose_name="出版日",
         help_text="YYYY-MM-DDの形式で入力してください。例：2025-01-01",
+        blank=True,
+        null=True,
+    )
+    published_date_precision = models.CharField(
+        max_length=10,
+        choices=PublishedDatePrecision.choices,
+        default=PublishedDatePrecision.UNKNOWN,
+        verbose_name="出版日精度",
+        help_text=(
+            "出版日がどこまで正確に分かっているかを選択してください。\n"
+            "\n"
+            "例：\n"
+            "- APIで年月日まで取得できた場合 → 「年月日」の精度が自動設定されます。\n"
+            "- APIで年月のみ、または年のみ取得できた場合 → 「年月」や「年」の精度が設定されます。\n"
+            "　※この場合、月や日は「1」に自動補完されています。\n"
+            "\n"
+            "正確な出版日が判明した場合は、出版日と精度を「年月日（day）」に更新してください。\n"
+            "出版日が完全に不明な場合は、「不明（unknown）」を選択してください。"
+        ),
     )
     image_url = models.URLField(
         blank=True,
