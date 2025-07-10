@@ -3,15 +3,41 @@
 {% block title %}本の詳細・貸出状況{% endblock title %}
 {% block content %}
 
-<h1>{{ book.title }}</h1>
-<p><strong>著者：</strong>{{ book.author }}</p>
-<p><strong>出版社：</strong>{{ book.publisher }}</p>
-<p><strong>出版日：</strong>{{ book.published_date }}</p>
-<p><strong>ISBN：</strong>{{ book.isbn }}</p>
-<img src="{{ book.image_url }}" alt="表紙画像" />
-<p><strong>内容紹介：</strong>{{ book.description|linebreaks }}</p>
+<!-- 書籍情報 -->
+<div class="mb-4 d-flex align-items-start">
+    {% if book.image_url %}
+    <img src="{{ book.image_url }}" alt="{{ book.title }} の書影" class="img-fluid rounded border shadow-sm"
+        style="max-width: 150px; margin-right: 20px;">
+    {% endif %}
+    <div>
+        <h2 class="h5">書籍情報</h2>
+        <div class="table-responsive" style="max-width: 500px;">
+            <table class="table table-bordered table-sm mb-0">
+                <tbody>
+                    <tr>
+                        <th scope="row">タイトル</th>
+                        <td><strong>{{ book.title }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">著者</th>
+                        <td>{{ book.author }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">出版社</th>
+                        <td>{{ book.publisher }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">出版日</th>
+                        <td>{{ book.published_date|default:"（未設定）" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-<h2>蔵書一覧</h2>
+<!-- 蔵書一覧 -->
+<h2>所蔵</h2>
 <table class="table">
     <thead>
         <tr>
@@ -34,5 +60,36 @@
         {% endfor %}
     </tbody>
 </table>
+
+<!-- 書籍の詳細情報 -->
+<h4 class="mt-4">書籍の詳細情報</h4>
+<div class="table-responsive" style="max-width: 600px;">
+    <table class="table table-bordered table-sm">
+        <tbody>
+            <tr>
+                <th scope="row">ISBN</th>
+                <td>{{ book.isbn }}</td>
+            </tr>
+            <tr>
+                <th scope="row">版数</th>
+                <td>
+                    {% if book.edition %}
+                    第{{ book.edition }}版
+                    {% else %}
+                    （未設定）
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">出版日の精度</th>
+                <td>{{ book.get_published_date_precision_display }}</td>
+            </tr>
+            <tr>
+                <th scope="row">内容紹介</th>
+                <td>{{ book.description|linebreaksbr|default:"（なし）" }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
 {% endblock content %}
