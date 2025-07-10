@@ -1,11 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
+from django.views.generic.edit import CreateView
 from django.db.models import Count, Q, Case, When, Value, IntegerField
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse
 
 from apps.core.mixins import IsGeneralMixin
 from apps.catalog.models import Book, Copy
 from apps.library.forms import BookSearchForm
+from apps.library.models import LoanHistory, ReservationHistory
 
 
 # Create your views here.
@@ -71,4 +74,29 @@ class BookDetailView(LoginRequiredMixin, IsGeneralMixin, DetailView):
             )
             .order_by("status_order")
         )
+        context["COPY_STATUS"] = Copy.Status
         return context
+
+
+class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
+    model = LoanHistory
+    fields = [
+        "loan_date",
+        "due_date",
+        "return_date",
+    ]
+    template_name = "library/loan_form.html"
+
+
+class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
+    model = ReservationHistory
+    fields = ["start_datetime", "end_datetime"]
+    template_name = "library/reservation_form.html"
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.book = get_object_or_404(Book, pk=self.kwargs["pk"])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("library:book_detail", kwargs={"pk": self.kwargs["pk"]})

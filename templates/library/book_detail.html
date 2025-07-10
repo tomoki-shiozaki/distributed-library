@@ -44,6 +44,7 @@
             <th>保存場所</th>
             <th>状態</th>
             <th>登録日</th>
+            <th>操作</th>
         </tr>
     </thead>
     <tbody>
@@ -52,14 +53,26 @@
             <td>{{ copy.location.name }}</td>
             <td>{{ copy.get_status_display }}</td>
             <td>{{ copy.registered_date }}</td>
+            <td>
+                {% if copy.status == COPY_STATUS.AVAILABLE %}
+                <a href="{% url 'library:loan_create' copy.pk %}" class="btn btn-primary btn-sm">貸出</a>
+                {% endif %}
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="3">この本の蔵書はありません。</td>
+            <td colspan="4">この本の蔵書はありません。</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<!-- 予約ボタン -->
+<div class="mt-3">
+    <a href="{% url 'library:reservation_create' book.pk %}" class="btn btn-outline-primary">
+        この本を予約する
+    </a>
+</div>
 
 <!-- 書籍の詳細情報 -->
 <h4 class="mt-4">書籍の詳細情報</h4>
