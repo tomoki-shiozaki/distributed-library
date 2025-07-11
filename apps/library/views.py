@@ -45,8 +45,10 @@ class BookSearchView(LoginRequiredMixin, IsGeneralMixin, ListView):
 
         # 各本に貸出可能なコピーの数を追加
         queryset = queryset.annotate(
-            available_count=Count("copy", filter=Q(copy__status=Copy.Status.AVAILABLE)),
-            loaned_count=Count("copy", filter=Q(copy__status=Copy.Status.LOANED)),
+            available_count=Count(
+                "copies", filter=Q(copies__status=Copy.Status.AVAILABLE)
+            ),
+            loaned_count=Count("copies", filter=Q(copies__status=Copy.Status.LOANED)),
         )
 
         return queryset
@@ -92,7 +94,7 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
 
 class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     model = ReservationHistory
-    fields = ["start_datetime", "end_datetime"]
+    fields = ["start_date", "end_date"]
     template_name = "library/reservation_form.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -103,8 +105,8 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
         form.instance.user = self.request.user
         form.instance.book = self.book
 
-        start = form.cleaned_data["start_datetime"]
-        end = form.cleaned_data["end_datetime"]
+        start = form.cleaned_data["start_date"]
+        end = form.cleaned_data["end_date"]
 
         if not book_has_available_copy(self.book, start, end):
             form.add_error(
@@ -118,3 +120,8 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
 
     def get_success_url(self):
         return reverse("library:book_detail", kwargs={"pk": self.kwargs["pk"]})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["book"] = self.book
+        return context

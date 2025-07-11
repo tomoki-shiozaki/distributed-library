@@ -40,8 +40,8 @@ class ReservationHistory(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="利用者")
     book = models.ForeignKey(Book, on_delete=models.CASCADE, verbose_name="本")
-    start_datetime = models.DateTimeField(verbose_name="予約開始日時")
-    end_datetime = models.DateTimeField(verbose_name="予約終了日時")
+    start_date = models.DateField(verbose_name="予約開始日")
+    end_date = models.DateField(verbose_name="予約終了日")
     status = models.CharField(
         max_length=10,
         choices=Status.choices,
