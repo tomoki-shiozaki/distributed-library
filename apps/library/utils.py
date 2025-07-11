@@ -17,7 +17,7 @@ def is_copy_available(copy, start, end, book):
         book=book, status=ReservationHistory.Status.RESERVED
     )
     for reservation in reservations:
-        if is_overlap(reservation.start_datetime, reservation.end_datetime, start, end):
+        if is_overlap(reservation.start_date, reservation.end_date, start, end):
             return False
 
     return True
