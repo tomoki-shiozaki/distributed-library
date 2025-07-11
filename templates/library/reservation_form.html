@@ -4,7 +4,25 @@
 
 {% block title %}蔵書の予約{% endblock title %}
 {% block content %}
+<h1>「{{ book.title }}」の予約</h1>
 
-<h1>本の予約</h1>
+<form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
 
+    <div class="mb-3">
+        <label for="id_start_datetime" class="form-label">予約開始日時</label>
+        {{ form.start_datetime.errors }}
+        {{ form.start_datetime|add_class:"form-control" }}
+    </div>
+
+    <div class="mb-3">
+        <label for="id_end_datetime" class="form-label">予約終了日時</label>
+        {{ form.end_datetime.errors }}
+        {{ form.end_datetime|add_class:"form-control" }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">予約する</button>
+    <a href="{% url 'library:book_detail' book.pk %}" class="btn btn-secondary ms-2">キャンセル</a>
+</form>
 {% endblock content %}

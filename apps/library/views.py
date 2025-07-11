@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView
 from django.db.models import Count, Q, Case, When, Value, IntegerField
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 
@@ -9,6 +10,7 @@ from apps.core.mixins import IsGeneralMixin
 from apps.catalog.models import Book, Copy
 from apps.library.forms import BookSearchForm
 from apps.library.models import LoanHistory, ReservationHistory
+from apps.library.utils import book_has_available_copy
 
 
 # Create your views here.
@@ -93,9 +95,25 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     fields = ["start_datetime", "end_datetime"]
     template_name = "library/reservation_form.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        self.book = get_object_or_404(Book, pk=self.kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         form.instance.user = self.request.user
-        form.instance.book = get_object_or_404(Book, pk=self.kwargs["pk"])
+        form.instance.book = self.book
+
+        start = form.cleaned_data["start_datetime"]
+        end = form.cleaned_data["end_datetime"]
+
+        if not book_has_available_copy(self.book, start, end):
+            form.add_error(
+                None,
+                "指定された期間では予約できる蔵書がありません。別の期間をお試しください。",
+            )
+            return self.form_invalid(form)
+
+        messages.success(self.request, "予約が完了しました。")
         return super().form_valid(form)
 
     def get_success_url(self):

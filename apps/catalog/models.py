@@ -107,7 +107,9 @@ class Copy(models.Model):
         LOANED = "loaned", "貸出中"
         DISCARDED = "discarded", "廃棄済み"
 
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, verbose_name="書籍")
+    book = models.ForeignKey(
+        Book, on_delete=models.CASCADE, related_name="copies", verbose_name="書籍"
+    )
     location = models.ForeignKey(
         StorageLocation, on_delete=models.CASCADE, verbose_name="保存場所"
     )
