@@ -6,8 +6,11 @@
 <!-- 書籍情報 -->
 <div class="mb-4 d-flex align-items-start">
     {% if book.image_url %}
-    <img src="{{ book.image_url }}" alt="{{ book.title }} の書影" class="img-fluid rounded border shadow-sm"
-        style="max-width: 150px; margin-right: 20px;">
+    <div
+        style="width: 150px; height: 220px; margin-right: 20px; background-color: #eee; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px;">
+        <img src="{{ book.image_url }}" alt="{{ book.title }} の書影" class="img-fluid rounded shadow-sm"
+            style="max-width: 100%; max-height: 100%; object-fit: contain;">
+    </div>
     {% endif %}
     <div>
         <h2 class="h5">書籍情報</h2>
