@@ -6,6 +6,26 @@
 {% block content %}
 <h1>「{{ book.title }}」の予約</h1>
 
+<h2>現在の貸出・予約状況</h2>
+
+<h3>貸出中</h3>
+<ul>
+    {% for loan in loan_periods %}
+    <li>{{ loan.loan_date }} 〜 {{ loan.due_date }}</li>
+    {% empty %}
+    <li>貸出中の予定はありません</li>
+    {% endfor %}
+</ul>
+
+<h3>予約中</h3>
+<ul>
+    {% for reservation in reservation_periods %}
+    <li>{{ reservation.start_date }} 〜 {{ reservation.end_date }}</li>
+    {% empty %}
+    <li>予約中の予定はありません</li>
+    {% endfor %}
+</ul>
+
 <form method="post" novalidate>
     {% csrf_token %}
     {{ form.non_field_errors }}

@@ -11,6 +11,7 @@ from apps.catalog.models import Book, Copy
 from apps.library.forms import BookSearchForm
 from apps.library.models import LoanHistory, ReservationHistory
 from apps.library.utils import book_has_available_copy
+from apps.library.forms import ReservationForm
 
 
 # Create your views here.
@@ -94,7 +95,7 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
 
 class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     model = ReservationHistory
-    fields = ["start_date", "end_date"]
+    form_class = ReservationForm
     template_name = "library/reservation_form.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -113,4 +114,15 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["book"] = self.copy.book
+
+        context["loan_periods"] = LoanHistory.objects.filter(
+            copy=self.copy,
+            status=LoanHistory.Status.ON_LOAN,
+        ).values("loan_date", "due_date")
+
+        context["reservation_periods"] = ReservationHistory.objects.filter(
+            copy=self.copy,
+            status=ReservationHistory.Status.RESERVED,
+        ).values("start_date", "end_date")
+
         return context

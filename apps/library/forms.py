@@ -1,5 +1,7 @@
 from django import forms
 
+from apps.library.models import ReservationHistory
+
 
 class BookSearchForm(forms.Form):
     title = forms.CharField(label="タイトル", required=False)
@@ -11,3 +13,13 @@ class BookSearchForm(forms.Form):
         max_length=13,
         help_text="13桁の数字をハイフンなしで入力してください。",
     )
+
+
+class ReservationForm(forms.ModelForm):
+    class Meta:
+        model = ReservationHistory
+        fields = ["start_date", "end_date"]
+        widgets = {
+            "start_date": forms.DateInput(attrs={"type": "date"}),
+            "end_date": forms.DateInput(attrs={"type": "date"}),
+        }
