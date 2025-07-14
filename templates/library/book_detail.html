@@ -60,6 +60,9 @@
                 {% if copy.status == COPY_STATUS.AVAILABLE %}
                 <a href="{% url 'library:loan_create' copy.pk %}" class="btn btn-primary btn-sm">貸出</a>
                 {% endif %}
+                {% if copy.status == COPY_STATUS.LOANED %}
+                <a href="{% url 'library:reservation_create' copy.pk %}" class="btn btn-outline-primary btn-sm">予約</a>
+                {% endif %}
             </td>
         </tr>
         {% empty %}
@@ -69,13 +72,6 @@
         {% endfor %}
     </tbody>
 </table>
-
-<!-- 予約ボタン -->
-<div class="mt-3">
-    <a href="{% url 'library:reservation_create' book.pk %}" class="btn btn-outline-primary">
-        この本を予約する
-    </a>
-</div>
 
 <!-- 書籍の詳細情報 -->
 <h4 class="mt-4">書籍の詳細情報</h4>

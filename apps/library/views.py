@@ -98,30 +98,19 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     template_name = "library/reservation_form.html"
 
     def dispatch(self, request, *args, **kwargs):
-        self.book = get_object_or_404(Book, pk=self.kwargs["pk"])
+        self.copy = get_object_or_404(Copy, pk=self.kwargs["pk"])
         return super().dispatch(request, *args, **kwargs)
 
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        form.instance.book = self.book
-
-        start = form.cleaned_data["start_date"]
-        end = form.cleaned_data["end_date"]
-
-        if not book_has_available_copy(self.book, start, end):
-            form.add_error(
-                None,
-                "指定された期間では予約できる蔵書がありません。別の期間をお試しください。",
-            )
-            return self.form_invalid(form)
-
-        messages.success(self.request, "予約が完了しました。")
-        return super().form_valid(form)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # copy をフォームのインスタンスに初期設定する
+        kwargs["instance"] = ReservationHistory(user=self.request.user, copy=self.copy)
+        return kwargs
 
     def get_success_url(self):
-        return reverse("library:book_detail", kwargs={"pk": self.kwargs["pk"]})
+        return reverse("library:book_detail", kwargs={"pk": self.copy.book.pk})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["book"] = self.book
+        context["book"] = self.copy.book
         return context
