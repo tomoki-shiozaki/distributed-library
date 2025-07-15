@@ -19,6 +19,10 @@ class ReservationForm(forms.ModelForm):
     class Meta:
         model = ReservationHistory
         fields = ["start_date", "end_date"]
+        help_texts = {
+            "start_date": "予約は本日以降の日付を指定してください。",
+            "end_date": "予約期間は最長14日間です。",
+        }
         widgets = {
             "start_date": forms.DateInput(attrs={"type": "date"}),
             "end_date": forms.DateInput(attrs={"type": "date"}),

@@ -4,58 +4,68 @@
 {% load crispy_forms_tags %}
 
 {% block title %}蔵書の予約{% endblock title %}
+
 {% block content %}
-<h1>「{{ book.title }}」の予約</h1>
+<div class="container mt-4">
+    <h1 class="mb-4">「{{ book.title }}」の予約</h1>
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>現在の貸出・予約状況</h2>
+    <div class="row">
+        <!-- 状況表示 -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    現在の貸出・予約状況
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">貸出状況</h5>
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for loan in loan_periods %}
+                        <li class="list-group-item">{{ loan.loan_date }} 〜 {{ loan.due_date }}</li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">現在貸出可能です</li>
+                        {% endfor %}
+                    </ul>
 
-        <h3>貸出中</h3>
-        <ul>
-            {% for loan in loan_periods %}
-            <li>{{ loan.loan_date }} 〜 {{ loan.due_date }}</li>
-            {% empty %}
-            <li>貸出中の予定はありません</li>
-            {% endfor %}
-        </ul>
-
-        <h3>予約中</h3>
-        <ul>
-            {% for reservation in reservation_periods %}
-            <li>{{ reservation.start_date }} 〜 {{ reservation.end_date }}</li>
-            {% empty %}
-            <li>予約中の予定はありません</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="col-md-8">
-        <h2>予約</h2>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            <!-- ここに予約開始・終了日フィールド -->
-            {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                {{ form.non_field_errors }}
+                    <h5 class="card-title">予約状況</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for reservation in reservation_periods %}
+                        <li class="list-group-item">{{ reservation.start_date }} 〜 {{ reservation.end_date }}</li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">予約はありません</li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
-            {% endif %}
-            <div class="mb-3">
-                <label for="{{ form.start_date.id_for_label }}" class="form-label">予約開始日時</label>
-                {{ form.start_date.errors }}
-                {{ form.start_date }}
-            </div>
+        </div>
 
-            <div class="mb-3">
-                <label for="{{ form.end_date.id_for_label }}" class="form-label">予約終了日時</label>
-                {{ form.end_date.errors }}
-                {{ form.end_date }}
-            </div>
+        <!-- 予約フォーム -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    予約フォーム
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">※ 予約開始日は本日から3か月以内、予約期間は最大14日間です。</p>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
 
-            <button type="submit" class="btn btn-primary">予約する</button>
-            <a href="{% url 'library:book_detail' book.pk %}" class="btn btn-secondary ms-2">キャンセル</a>
-        </form>
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        {{ form|crispy }}
+
+                        <div class="d-flex justify-content-start">
+                            <button type="submit" class="btn btn-success me-2">予約する</button>
+                            <a href="{% url 'library:book_detail' book.pk %}"
+                                class="btn btn-outline-secondary">キャンセル</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 {% endblock content %}
