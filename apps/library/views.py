@@ -10,7 +10,6 @@ from apps.core.mixins import IsGeneralMixin
 from apps.catalog.models import Book, Copy
 from apps.library.forms import BookSearchForm
 from apps.library.models import LoanHistory, ReservationHistory
-from apps.library.utils import book_has_available_copy
 from apps.library.forms import ReservationForm
 
 
@@ -107,6 +106,11 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
         # copy をフォームのインスタンスに初期設定する
         kwargs["instance"] = ReservationHistory(user=self.request.user, copy=self.copy)
         return kwargs
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "予約が完了しました。")
+        return response
 
     def get_success_url(self):
         return reverse("library:book_detail", kwargs={"pk": self.copy.book.pk})
