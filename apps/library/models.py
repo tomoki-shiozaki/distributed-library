@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from apps.catalog.models import Copy
 
@@ -28,12 +29,52 @@ class LoanHistory(models.Model):
         verbose_name="ステータス",
     )
 
+    def __str__(self):
+        return f"{self.user} - {self.copy} ({self.status})"
+
+    def clean(self):
+        super().clean()
+        # 貸出日 <= 返却予定日 であることを保証
+        if self.due_date < self.loan_date:
+            raise ValidationError("返却予定日は貸出日以降の日付を指定してください。")
+
+        # 返却日がある場合、貸出日 <= 返却日 <= 今日であることを保証
+        if self.return_date:
+            if self.return_date < self.loan_date:
+                raise ValidationError("返却日は貸出日以降の日付を指定してください。")
+            if self.return_date > timezone.now().date():
+                raise ValidationError("返却日は今日以前の日付を指定してください。")
+
+    def mark_returned(self, return_date=None):
+        """
+        返却処理用のヘルパーメソッド。
+        引数がなければ今日を返却日に設定。
+        statusを返却済みに更新し、保存する。
+        """
+        self.return_date = return_date or timezone.now().date()
+        self.status = self.Status.RETURNED
+        self.save()
+
+    def save(self, *args, **kwargs):
+        # 重複貸出チェック（例：同じcopyに対してON_LOANが複数存在しないように）
+        if self.status == self.Status.ON_LOAN:
+            overlapping = LoanHistory.objects.filter(
+                copy=self.copy, status=self.Status.ON_LOAN
+            )
+            if self.pk:
+                overlapping = overlapping.exclude(pk=self.pk)
+            if overlapping.exists():
+                raise ValidationError("この蔵書は既に貸出中です。")
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "貸出履歴"
         verbose_name_plural = "貸出履歴"
-
-    def __str__(self):
-        return f"{self.user} - {self.copy} ({self.status})"
+        indexes = [
+            models.Index(fields=["user"]),
+            models.Index(fields=["copy"]),
+            models.Index(fields=["status"]),
+        ]
 
 
 class ReservationHistory(models.Model):
@@ -53,6 +94,9 @@ class ReservationHistory(models.Model):
         verbose_name="ステータス",
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="予約作成日")
+
+    def __str__(self):
+        return f"{self.user} - {self.copy} ({self.status})"
 
     def clean(self):
         super().clean()
@@ -95,6 +139,3 @@ class ReservationHistory(models.Model):
     class Meta:
         verbose_name = "予約履歴"
         verbose_name_plural = "予約履歴"
-
-    def __str__(self):
-        return f"{self.user} - {self.copy} ({self.status})"
