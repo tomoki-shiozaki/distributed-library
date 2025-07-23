@@ -1,10 +1,10 @@
 from datetime import date, timedelta
 
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
+from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from apps.catalog.models import Copy
 
@@ -19,7 +19,7 @@ class LoanHistory(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="利用者")
     copy = models.ForeignKey(Copy, on_delete=models.CASCADE, verbose_name="蔵書")
-    loan_date = models.DateField(verbose_name="貸出日")
+    loan_date = models.DateField(default=timezone.now, verbose_name="貸出日")
     due_date = models.DateField(verbose_name="返却予定日")
     return_date = models.DateField(null=True, blank=True, verbose_name="返却日")
     status = models.CharField(
@@ -34,16 +34,46 @@ class LoanHistory(models.Model):
 
     def clean(self):
         super().clean()
-        # 貸出日 <= 返却予定日 であることを保証
-        if self.due_date < self.loan_date:
-            raise ValidationError("返却予定日は貸出日以降の日付を指定してください。")
 
-        # 返却日がある場合、貸出日 <= 返却日 <= 今日であることを保証
+        # 貸出日 <= 返却予定日 <= 貸出日 + 14日
+        if self.due_date < self.loan_date:
+            raise ValidationError(_("返却予定日は貸出日以降の日付を指定してください。"))
+        if self.due_date > self.loan_date + timedelta(days=14):
+            raise ValidationError(
+                _("返却予定日は貸出日から14日以内の日付を指定してください。")
+            )
+
+        # 返却日がある場合、貸出日 <= 返却日 <= 今日
         if self.return_date:
             if self.return_date < self.loan_date:
                 raise ValidationError("返却日は貸出日以降の日付を指定してください。")
             if self.return_date > timezone.now().date():
                 raise ValidationError("返却日は今日以前の日付を指定してください。")
+
+        # 重複貸出チェック（例：同じcopyに対してON_LOANが複数存在しないように）
+        if self.status == self.Status.ON_LOAN:
+            overlapping = LoanHistory.objects.filter(
+                copy=self.copy, status=self.Status.ON_LOAN
+            ).exclude(pk=self.pk)
+            if overlapping.exists():
+                raise ValidationError("この蔵書は既に貸出中です。")
+
+        # 有効な予約が存在するかチェック（自分以外の人）
+        overlapping_reservation = ReservationHistory.objects.filter(
+            copy=self.copy,
+            status=ReservationHistory.Status.RESERVED,
+            start_date__lte=self.due_date,
+            end_date__gte=self.loan_date,
+        ).exclude(user=self.user)
+
+        if overlapping_reservation.exists():
+            raise ValidationError(
+                "他の利用者による予約が存在するため、貸出できません。"
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def mark_returned(self, return_date=None):
         """
@@ -54,18 +84,6 @@ class LoanHistory(models.Model):
         self.return_date = return_date or timezone.now().date()
         self.status = self.Status.RETURNED
         self.save()
-
-    def save(self, *args, **kwargs):
-        # 重複貸出チェック（例：同じcopyに対してON_LOANが複数存在しないように）
-        if self.status == self.Status.ON_LOAN:
-            overlapping = LoanHistory.objects.filter(
-                copy=self.copy, status=self.Status.ON_LOAN
-            )
-            if self.pk:
-                overlapping = overlapping.exclude(pk=self.pk)
-            if overlapping.exists():
-                raise ValidationError("この蔵書は既に貸出中です。")
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "貸出履歴"
@@ -135,6 +153,32 @@ class ReservationHistory(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def cancel(self):
+        if self.status != self.Status.RESERVED:
+            raise ValidationError("予約中のものしかキャンセルできません。")
+        self.status = self.Status.CANCELED
+        self.save()
+
+    def convert_to_loan(self, loan_date=None):
+        if self.status != self.Status.RESERVED:
+            raise ValidationError("予約中のものしか貸出にできません。")
+
+        loan_date = loan_date or timezone.now().date()
+        if loan_date > self.end_date:
+            raise ValidationError("貸出日は予約終了日より後にはできません。")
+        due_date = self.end_date
+        loan = LoanHistory.objects.create(
+            user=self.user,
+            copy=self.copy,
+            loan_date=loan_date,
+            due_date=due_date,
+        )
+
+        self.status = self.Status.COMPLETED
+        self.save()
+
+        return loan
 
     class Meta:
         verbose_name = "予約履歴"
