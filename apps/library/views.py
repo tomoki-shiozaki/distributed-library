@@ -1,16 +1,16 @@
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView
-from django.db.models import Count, Q, Case, When, Value, IntegerField
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse
+from django.core.exceptions import ValidationError
+from django.db.models import Case, Count, IntegerField, Q, Value, When
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.views.generic import DetailView, ListView
+from django.views.generic.edit import CreateView
 
-from apps.core.mixins import IsGeneralMixin
 from apps.catalog.models import Book, Copy
-from apps.library.forms import BookSearchForm
+from apps.core.mixins import IsGeneralMixin
+from apps.library.forms import BookSearchForm, ReservationForm
 from apps.library.models import LoanHistory, ReservationHistory
-from apps.library.forms import ReservationForm
 
 
 # Create your views here.
@@ -87,9 +87,29 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     fields = [
         "loan_date",
         "due_date",
-        "return_date",
     ]
     template_name = "library/loan_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.copy = get_object_or_404(Copy, pk=kwargs["copy_pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        user = self.request.user
+        loan_date = form.cleaned_data["loan_date"]
+        due_date = form.cleaned_data["due_date"]
+
+        try:
+            LoanHistory.loan_copy(user, self.copy, loan_date, due_date)
+        except ValidationError as e:
+            form.add_error(None, e.message)
+            return self.form_invalid(form)
+
+        messages.success(self.request, "貸出処理が完了しました。")
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse_lazy("library:book_detail", kwargs={"pk": self.copy.book.pk})
 
 
 class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):

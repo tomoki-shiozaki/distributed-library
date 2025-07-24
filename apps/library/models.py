@@ -2,7 +2,7 @@ from datetime import date, timedelta
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -31,6 +31,52 @@ class LoanHistory(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.copy} ({self.status})"
+
+    @classmethod
+    def loan_copy(cls, user, copy, loan_date, due_date):
+        with transaction.atomic():
+            # 蔵書ロック
+            copy_locked = Copy.objects.select_for_update().get(pk=copy.pk)
+
+            if copy_locked.status == Copy.Status.LOANED:
+                raise ValidationError("この蔵書は既に貸出中です。")
+
+            # 予約チェック
+            overlapping_reservation = ReservationHistory.objects.filter(
+                copy=copy_locked,
+                status=ReservationHistory.Status.RESERVED,
+                start_date__lte=due_date,
+                end_date__gte=loan_date,
+            ).exclude(user=user)
+            if overlapping_reservation.exists():
+                raise ValidationError(
+                    "他の利用者による予約が存在するため、貸出できません。"
+                )
+
+            # 貸出履歴作成
+            loan_history = cls.objects.create(
+                user=user,
+                copy=copy_locked,
+                loan_date=loan_date,
+                due_date=due_date,
+                status=cls.Status.ON_LOAN,
+            )
+
+            # 蔵書の状態更新
+            copy_locked.status = Copy.Status.LOANED
+            copy_locked.save()
+
+            return loan_history
+
+    def mark_returned(self, return_date=None):
+        """
+        返却処理用のヘルパーメソッド。
+        引数がなければ今日を返却日に設定。
+        statusを返却済みに更新し、保存する。
+        """
+        self.return_date = return_date or timezone.now().date()
+        self.status = self.Status.RETURNED
+        self.save()
 
     def clean(self):
         super().clean()
@@ -70,16 +116,6 @@ class LoanHistory(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
-
-    def mark_returned(self, return_date=None):
-        """
-        返却処理用のヘルパーメソッド。
-        引数がなければ今日を返却日に設定。
-        statusを返却済みに更新し、保存する。
-        """
-        self.return_date = return_date or timezone.now().date()
-        self.status = self.Status.RETURNED
-        self.save()
 
     class Meta:
         verbose_name = "貸出履歴"
