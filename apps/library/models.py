@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -148,10 +148,46 @@ class ReservationHistory(models.Model):
     def __str__(self):
         return f"{self.user} - {self.copy} ({self.status})"
 
+    @classmethod
+    def reserve_copy(cls, user, copy, start_date, end_date):
+        with transaction.atomic():
+            # 対象の蔵書をロック
+            copy_locked = Copy.objects.select_for_update().get(pk=copy.pk)
+
+            if copy_locked.status != Copy.Status.LOANED:
+                raise ValidationError("貸出中の蔵書のみ予約可能です。")
+
+            # 重複予約がないか確認
+            overlapping = (
+                cls.objects.select_for_update()
+                .filter(
+                    copy=copy_locked,
+                    status=cls.Status.RESERVED,
+                    start_date__lte=end_date,
+                    end_date__gte=start_date,
+                )
+                .exclude(user=user)
+            )
+            if overlapping.exists():
+                raise ValidationError("この蔵書には、重複する予約がすでに存在します。")
+
+            # 予約を保存
+            reservation = cls.objects.create(
+                user=user,
+                copy=copy_locked,
+                start_date=start_date,
+                end_date=end_date,
+                status=cls.Status.RESERVED,
+            )
+            return reservation
+
     def clean(self):
         super().clean()
 
-        today = date.today()
+        if self.copy.status != Copy.Status.LOANED:
+            raise ValidationError("貸出中の蔵書のみ予約可能です。")
+
+        today = timezone.now().date()
         max_start_date = today + timedelta(days=90)
 
         if self.start_date < today:

@@ -121,16 +121,23 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
         self.copy = get_object_or_404(Copy, pk=self.kwargs["pk"])
         return super().dispatch(request, *args, **kwargs)
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # copy をフォームのインスタンスに初期設定する
-        kwargs["instance"] = ReservationHistory(user=self.request.user, copy=self.copy)
-        return kwargs
-
     def form_valid(self, form):
-        response = super().form_valid(form)
+        start_date = form.cleaned_data["start_date"]
+        end_date = form.cleaned_data["end_date"]
+
+        try:
+            ReservationHistory.reserve_copy(
+                user=self.request.user,
+                copy=self.copy,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        except ValidationError as e:
+            form.add_error(None, e.message)
+            return self.form_invalid(form)
+
         messages.success(self.request, "予約が完了しました。")
-        return response
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse("library:book_detail", kwargs={"pk": self.copy.book.pk})
