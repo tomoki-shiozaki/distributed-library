@@ -226,7 +226,7 @@ class ReservationHistory(models.Model):
         if loan_date > self.end_date:
             raise ValidationError("貸出日は予約終了日より後にはできません。")
         due_date = self.end_date
-        loan = LoanHistory.objects.create(
+        loan = LoanHistory.loan_copy(
             user=self.user,
             copy=self.copy,
             loan_date=loan_date,

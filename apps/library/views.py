@@ -4,12 +4,13 @@ from django.core.exceptions import ValidationError
 from django.db.models import Case, Count, IntegerField, Q, Value, When
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView
 
 from apps.catalog.models import Book, Copy
 from apps.core.mixins import IsGeneralMixin
-from apps.library.forms import BookSearchForm, ReservationForm
+from apps.library.forms import BookSearchForm, LoanForm, ReservationForm
 from apps.library.models import LoanHistory, ReservationHistory
 
 
@@ -84,10 +85,7 @@ class BookDetailView(LoginRequiredMixin, IsGeneralMixin, DetailView):
 
 class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     model = LoanHistory
-    fields = [
-        "loan_date",
-        "due_date",
-    ]
+    form_class = LoanForm
     template_name = "library/loan_form.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -96,7 +94,7 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
 
     def form_valid(self, form):
         user = self.request.user
-        loan_date = form.cleaned_data["loan_date"]
+        loan_date = timezone.now().date()
         due_date = form.cleaned_data["due_date"]
 
         if not LoanHistory.can_borrow_more(user):

@@ -1,6 +1,6 @@
 from django import forms
 
-from apps.library.models import ReservationHistory
+from apps.library.models import LoanHistory, ReservationHistory
 
 
 class BookSearchForm(forms.Form):
@@ -13,6 +13,18 @@ class BookSearchForm(forms.Form):
         max_length=13,
         help_text="13桁の数字をハイフンなしで入力してください。",
     )
+
+
+class LoanForm(forms.ModelForm):
+    class Meta:
+        model = LoanHistory
+        fields = ["due_date"]
+        help_texts = {
+            "due_date": "返却予定日は貸出日（本日）から14日以内の日付を指定してください。",
+        }
+        widgets = {
+            "due_date": forms.DateInput(attrs={"type": "date"}),
+        }
 
 
 class ReservationForm(forms.ModelForm):
