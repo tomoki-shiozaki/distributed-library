@@ -34,6 +34,9 @@ class LoanHistory(models.Model):
 
     @classmethod
     def loan_copy(cls, user, copy, loan_date, due_date):
+        if not cls.can_borrow_more(user):
+            raise ValidationError("貸出可能な上限に達しています。")
+
         with transaction.atomic():
             # 蔵書ロック
             copy_locked = Copy.objects.select_for_update().get(pk=copy.pk)
@@ -67,6 +70,12 @@ class LoanHistory(models.Model):
             copy_locked.save()
 
             return loan_history
+
+    @classmethod
+    def can_borrow_more(cls, user):
+        max_borrow = 5
+        current_loans = cls.objects.filter(user=user, status=cls.Status.ON_LOAN).count()
+        return current_loans < max_borrow
 
     def mark_returned(self, return_date=None):
         """
@@ -133,6 +142,9 @@ class ReservationHistory(models.Model):
 
     @classmethod
     def reserve_copy(cls, user, copy, start_date, end_date):
+        if not cls.can_make_reservation(user):
+            raise ValidationError("予約可能な上限に達しています。")
+
         with transaction.atomic():
             # 対象の蔵書をロック
             copy_locked = Copy.objects.select_for_update().get(pk=copy.pk)
@@ -163,6 +175,14 @@ class ReservationHistory(models.Model):
                 status=cls.Status.RESERVED,
             )
             return reservation
+
+    @classmethod
+    def can_make_reservation(cls, user):
+        max_reservations = 3
+        current_reservations = cls.objects.filter(
+            user=user, status=cls.Status.RESERVED
+        ).count()
+        return current_reservations < max_reservations
 
     def clean(self):
         super().clean()

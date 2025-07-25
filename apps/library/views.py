@@ -99,6 +99,10 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
         loan_date = form.cleaned_data["loan_date"]
         due_date = form.cleaned_data["due_date"]
 
+        if not LoanHistory.can_borrow_more(user):
+            form.add_error(None, "貸出可能な上限に達しています。")
+            return self.form_invalid(form)
+
         try:
             LoanHistory.loan_copy(user, self.copy, loan_date, due_date)
         except ValidationError as e:
@@ -124,10 +128,15 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     def form_valid(self, form):
         start_date = form.cleaned_data["start_date"]
         end_date = form.cleaned_data["end_date"]
+        user = self.request.user
+
+        if not ReservationHistory.can_make_reservation(user):
+            form.add_error(None, "予約可能な上限に達しています。")
+            return self.form_invalid(form)
 
         try:
             ReservationHistory.reserve_copy(
-                user=self.request.user,
+                user=user,
                 copy=self.copy,
                 start_date=start_date,
                 end_date=end_date,
