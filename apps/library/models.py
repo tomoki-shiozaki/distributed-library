@@ -96,23 +96,6 @@ class LoanHistory(models.Model):
             if self.return_date > timezone.now().date():
                 raise ValidationError("返却日は今日以前の日付を指定してください。")
 
-        # 貸出中の蔵書は貸し出し不可
-        if self.copy.status == Copy.Status.LOANED:
-            raise ValidationError("この蔵書は既に貸出中です。")
-
-        # 予約が存在するかチェック（自分以外の人）
-        overlapping_reservation = ReservationHistory.objects.filter(
-            copy=self.copy,
-            status=ReservationHistory.Status.RESERVED,
-            start_date__lte=self.due_date,
-            end_date__gte=self.loan_date,
-        ).exclude(user=self.user)
-
-        if overlapping_reservation.exists():
-            raise ValidationError(
-                "他の利用者による予約が存在するため、貸出できません。"
-            )
-
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -184,9 +167,6 @@ class ReservationHistory(models.Model):
     def clean(self):
         super().clean()
 
-        if self.copy.status != Copy.Status.LOANED:
-            raise ValidationError("貸出中の蔵書のみ予約可能です。")
-
         today = timezone.now().date()
         max_start_date = today + timedelta(days=90)
 
@@ -207,16 +187,6 @@ class ReservationHistory(models.Model):
         # 最大期間2週間以内
         if self.end_date - self.start_date > timedelta(days=14):
             raise ValidationError(_("予約期間は最大14日間までです。"))
-
-        # 予約重複チェック
-        overlapping = ReservationHistory.objects.filter(
-            copy=self.copy,
-            status=ReservationHistory.Status.RESERVED,
-            start_date__lte=self.end_date,
-            end_date__gte=self.start_date,
-        ).exclude(id=self.id)
-        if overlapping.exists():
-            raise ValidationError(_("この蔵書には、重複する予約がすでに存在します。"))
 
     def save(self, *args, **kwargs):
         self.full_clean()
