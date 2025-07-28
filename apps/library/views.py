@@ -113,6 +113,22 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy("library:book_detail", kwargs={"pk": self.copy.book.pk})
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["book"] = self.copy.book
+
+        context["loan_periods"] = LoanHistory.objects.filter(
+            copy=self.copy,
+            status=LoanHistory.Status.ON_LOAN,
+        ).values("loan_date", "due_date")
+
+        context["reservation_periods"] = ReservationHistory.objects.filter(
+            copy=self.copy,
+            status=ReservationHistory.Status.RESERVED,
+        ).values("start_date", "end_date")
+
+        return context
+
 
 class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
     model = ReservationHistory

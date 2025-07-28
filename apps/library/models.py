@@ -19,7 +19,7 @@ class LoanHistory(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="利用者")
     copy = models.ForeignKey(Copy, on_delete=models.CASCADE, verbose_name="蔵書")
-    loan_date = models.DateField(default=timezone.now, verbose_name="貸出日")
+    loan_date = models.DateField(verbose_name="貸出日")
     due_date = models.DateField(verbose_name="返却予定日")
     return_date = models.DateField(null=True, blank=True, verbose_name="返却日")
     status = models.CharField(
