@@ -1,4 +1,6 @@
 from django import forms
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from apps.library.models import LoanHistory, ReservationHistory
 
@@ -25,6 +27,25 @@ class LoanForm(forms.ModelForm):
         widgets = {
             "due_date": forms.DateInput(attrs={"type": "date"}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        loan_date = timezone.now().date()
+        due_date = cleaned_data.get("due_date")
+
+        # モデルの clean() を呼んで日付バリデーション
+        temp_instance = LoanHistory(
+            loan_date=loan_date,
+            due_date=due_date,
+        )
+        try:
+            temp_instance.clean()
+        except ValidationError as e:
+            for field, messages in e.message_dict.items():
+                for message in messages:
+                    self.add_error(field, message)
+
+        return cleaned_data
 
 
 class ReservationForm(forms.ModelForm):
