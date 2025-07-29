@@ -95,6 +95,7 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        kwargs["today"] = self.today
         kwargs["initial"] = kwargs.get("initial", {})
         kwargs["initial"]["loan_date"] = self.today
         return kwargs

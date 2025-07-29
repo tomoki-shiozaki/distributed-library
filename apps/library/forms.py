@@ -29,6 +29,16 @@ class LoanForm(forms.ModelForm):
             "due_date": forms.DateInput(attrs={"type": "date"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.today = kwargs.pop("today")
+        super().__init__(*args, **kwargs)
+
+    def clean_loan_date(self):
+        value = self.cleaned_data.get("loan_date")
+        if value != self.today:
+            raise forms.ValidationError("貸出日は今日以外にできません。")
+        return value
+
 
 class ReservationForm(forms.ModelForm):
     class Meta:
