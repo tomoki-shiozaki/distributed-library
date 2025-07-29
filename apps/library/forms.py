@@ -20,32 +20,14 @@ class BookSearchForm(forms.Form):
 class LoanForm(forms.ModelForm):
     class Meta:
         model = LoanHistory
-        fields = ["due_date"]
+        fields = ["loan_date", "due_date"]
         help_texts = {
             "due_date": "返却予定日は貸出日（本日）から14日以内の日付を指定してください。",
         }
         widgets = {
+            "loan_date": forms.HiddenInput(),
             "due_date": forms.DateInput(attrs={"type": "date"}),
         }
-
-    def clean(self):
-        cleaned_data = super().clean()
-        loan_date = timezone.now().date()
-        due_date = cleaned_data.get("due_date")
-
-        # モデルの clean() を呼んで日付バリデーション
-        temp_instance = LoanHistory(
-            loan_date=loan_date,
-            due_date=due_date,
-        )
-        try:
-            temp_instance.clean()
-        except ValidationError as e:
-            for field, messages in e.message_dict.items():
-                for message in messages:
-                    self.add_error(field, message)
-
-        return cleaned_data
 
 
 class ReservationForm(forms.ModelForm):

@@ -91,27 +91,19 @@ class LoanHistory(models.Model):
         errors = {}
 
         # 日付チェック: loan_date <= due_date <= loan_date + 14日
-        if self.loan_date and self.due_date:
-            if self.due_date < self.loan_date:
-                errors["due_date"] = "返却予定日は貸出日以降の日付を指定してください。"
-            elif self.due_date > self.loan_date + timedelta(days=14):
-                errors["due_date"] = (
-                    "返却予定日は貸出日から14日以内の日付を指定してください。"
-                )
+        if self.due_date < self.loan_date:
+            errors["due_date"] = "返却予定日は貸出日以降の日付を指定してください。"
+        elif self.due_date > self.loan_date + timedelta(days=14):
+            errors["due_date"] = (
+                "返却予定日は貸出日から14日以内の日付を指定してください。"
+            )
 
         # 返却日がある場合のバリデーション
         if self.return_date:
-            if not self.loan_date:
-                errors["return_date"] = (
-                    "貸出日が存在しない状態で返却日は指定できません。"
-                )
-            else:
-                if self.return_date < self.loan_date:
-                    errors["return_date"] = (
-                        "返却日は貸出日以降の日付を指定してください。"
-                    )
-                elif self.return_date > timezone.now().date():
-                    errors["return_date"] = "返却日は今日以前の日付を指定してください。"
+            if self.return_date < self.loan_date:
+                errors["return_date"] = "返却日は貸出日以降の日付を指定してください。"
+            elif self.return_date > timezone.now().date():
+                errors["return_date"] = "返却日は今日以前の日付を指定してください。"
 
         if errors:
             raise ValidationError(errors)

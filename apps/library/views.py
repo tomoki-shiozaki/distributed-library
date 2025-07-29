@@ -90,11 +90,18 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         self.copy = get_object_or_404(Copy, pk=kwargs["copy_pk"])
+        self.today = timezone.now().date()
         return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["initial"] = kwargs.get("initial", {})
+        kwargs["initial"]["loan_date"] = self.today
+        return kwargs
 
     def form_valid(self, form):
         user = self.request.user
-        loan_date = timezone.now().date()
+        loan_date = self.today
         due_date = form.cleaned_data["due_date"]
 
         if not LoanHistory.can_borrow_more(user):
