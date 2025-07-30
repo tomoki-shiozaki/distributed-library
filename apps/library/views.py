@@ -115,7 +115,12 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
             form.add_error(None, e.message)
             return self.form_invalid(form)
 
-        messages.success(self.request, "貸出処理が完了しました。")
+        formatted_due_date = due_date.strftime("%Y年%m月%d日")
+
+        messages.success(
+            self.request,
+            f"「{self.copy.book.title}」の貸出処理が完了しました。返却期限は {formatted_due_date} です。",
+        )
         return redirect(self.get_success_url())
 
     def get_success_url(self):
@@ -167,7 +172,14 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
             form.add_error(None, e.message)
             return self.form_invalid(form)
 
-        messages.success(self.request, "予約が完了しました。")
+        formatted_start_date = start_date.strftime("%Y年%m月%d日")
+        formatted_end_date = end_date.strftime("%Y年%m月%d日")
+
+        messages.success(
+            self.request,
+            f"「{self.copy.book.title}」の予約処理が完了しました。予約期間は {formatted_start_date} ~ {formatted_end_date}です。",
+        )
+
         return redirect(self.get_success_url())
 
     def get_success_url(self):
