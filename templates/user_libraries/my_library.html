@@ -15,7 +15,7 @@
             <div class="list-group">
                 {% for loan in loans %}
                 <div class="list-group-item">
-                    <div class="d-flex">
+                    <div class="d-flex justify-content-between align-items-center">
                         <!-- 書影 -->
                         <div class="flex-shrink-0 me-3">
                             {% if loan.copy.book.image_url %}
@@ -33,7 +33,11 @@
                         <div class="flex-grow-1">
                             <h6 class="mb-1">{{ loan.copy.book.title }}</h6>
                             <small class="text-muted">著者: {{ loan.copy.book.author }}</small><br>
+                            <small class="text-muted">保存場所: {{ loan.copy.location.name }}</small><br>
                             <span class="badge bg-warning text-dark mt-1">返却期限: {{ loan.due_date|date:"Y年m月d日" }}</span>
+                        </div>
+                        <div>
+                            <a href="" class="btn btn-sm btn-outline-danger">返却</a>
                         </div>
                     </div>
                 </div>
@@ -55,7 +59,7 @@
             <div class="list-group">
                 {% for res in reservations %}
                 <div class="list-group-item">
-                    <div class="d-flex">
+                    <div class="d-flex justify-content-between align-items-center">
                         <!-- 書影 -->
                         <div class="flex-shrink-0 me-3">
                             {% if res.copy.book.image_url %}
@@ -73,9 +77,16 @@
                         <div class="flex-grow-1">
                             <h6 class="mb-1">{{ res.copy.book.title }}</h6>
                             <small class="text-muted">著者: {{ res.copy.book.author }}</small><br>
+                            <small class="text-muted">保存場所: {{ res.copy.location.name }}</small><br>
                             <span class="badge bg-info text-dark mt-1">
                                 予約期間: {{ res.start_date|date:"Y年m月d日" }} ～ {{ res.end_date|date:"Y年m月d日" }}
                             </span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <a href="#" class="btn btn-sm btn-outline-danger">予約取り消し</a>
+                            {% if res.can_loan_now %}
+                            <a href="#" class="btn btn-sm btn-primary">貸出</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

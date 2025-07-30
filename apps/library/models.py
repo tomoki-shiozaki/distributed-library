@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -73,7 +74,7 @@ class LoanHistory(models.Model):
 
     @classmethod
     def can_borrow_more(cls, user):
-        max_borrow = 5
+        max_borrow = settings.MAX_LOAN_COUNT
         current_loans = cls.objects.filter(user=user, status=cls.Status.ON_LOAN).count()
         return current_loans < max_borrow
 
@@ -187,7 +188,7 @@ class ReservationHistory(models.Model):
 
     @classmethod
     def can_make_reservation(cls, user):
-        max_reservations = 3
+        max_reservations = settings.MAX_RESERVATION_COUNT
         current_reservations = cls.objects.filter(
             user=user, status=cls.Status.RESERVED
         ).count()
