@@ -37,7 +37,14 @@
                             <span class="badge bg-warning text-dark mt-1">返却期限: {{ loan.due_date|date:"Y年m月d日" }}</span>
                         </div>
                         <div>
-                            <a href="" class="btn btn-sm btn-outline-danger">返却</a>
+                            <form method="post" action="{% url 'user_libraries:copy_return' loan.id %}"
+                                style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('この本を返却しますか？');">
+                                    返却
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

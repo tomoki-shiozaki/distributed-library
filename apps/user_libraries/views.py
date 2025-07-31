@@ -1,6 +1,8 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views import View
 from django.views.generic import TemplateView
 
 from apps.catalog.models import Copy
@@ -33,3 +35,22 @@ class MyLibraryView(LoginRequiredMixin, IsGeneralMixin, TemplateView):
 
         context["reservations"] = reservations
         return context
+
+
+class CopyReturnView(LoginRequiredMixin, IsGeneralMixin, View):
+    def post(self, request, *args, **kwargs):
+        loan_id = kwargs.get("loan_id")
+        loan = get_object_or_404(LoanHistory, id=loan_id, user=request.user)
+
+        if loan.status == LoanHistory.Status.RETURNED:
+            messages.warning(request, "この本はすでに返却されています。")
+            return redirect("user_libraries:my_library")
+
+        # 返却処理
+        loan.mark_returned()
+
+        loan.copy.status = Copy.Status.AVAILABLE
+        loan.copy.save()
+
+        messages.success(request, "返却が完了しました。")
+        return redirect("user_libraries:my_library")
