@@ -37,7 +37,7 @@
                             <span class="badge bg-warning text-dark mt-1">返却期限: {{ loan.due_date|date:"Y年m月d日" }}</span>
                         </div>
                         <div>
-                            <form method="post" action="{% url 'user_libraries:copy_return' loan.id %}"
+                            <form method="post" action="{% url 'user_libraries:loan_return' loan.pk %}"
                                 style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-outline-danger"
