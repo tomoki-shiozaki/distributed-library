@@ -197,26 +197,30 @@ class ReservationHistory(models.Model):
     def clean(self):
         super().clean()
 
-        today = timezone.now().date()
-        max_start_date = today + timedelta(days=90)
+        # 予約中の場合のみ日付チェックを厳格に行う
+        if self.status == self.Status.RESERVED:
+            today = timezone.now().date()
+            max_start_date = today + timedelta(days=90)
 
-        if self.start_date < today:
-            raise ValidationError(_("予約開始日は本日以降の日付を指定してください。"))
+            if self.start_date < today:
+                raise ValidationError(
+                    _("予約開始日は本日以降の日付を指定してください。")
+                )
 
-        if self.start_date > max_start_date:
-            raise ValidationError(
-                _("予約開始日は本日から3か月以内の日付を指定してください。")
-            )
+            if self.start_date > max_start_date:
+                raise ValidationError(
+                    _("予約開始日は本日から3か月以内の日付を指定してください。")
+                )
 
-        # 開始日より終了日が前
-        if self.end_date < self.start_date:
-            raise ValidationError(
-                _("予約終了日は予約開始日以降の日付を指定してください。")
-            )
+            # 開始日より終了日が前
+            if self.end_date < self.start_date:
+                raise ValidationError(
+                    _("予約終了日は予約開始日以降の日付を指定してください。")
+                )
 
-        # 最大期間2週間以内
-        if self.end_date - self.start_date > timedelta(days=14):
-            raise ValidationError(_("予約期間は最大14日間までです。"))
+            # 最大期間2週間以内
+            if self.end_date - self.start_date > timedelta(days=14):
+                raise ValidationError(_("予約期間は最大14日間までです。"))
 
     def save(self, *args, **kwargs):
         self.full_clean()

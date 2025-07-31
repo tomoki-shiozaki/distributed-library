@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import View
@@ -59,17 +60,13 @@ class LoanReturnView(LoginRequiredMixin, IsGeneralMixin, View):
 class ReservationCancelView(LoginRequiredMixin, IsGeneralMixin, View):
     def post(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
-        loan = get_object_or_404(LoanHistory, pk=pk, user=request.user)
+        reservation = get_object_or_404(ReservationHistory, pk=pk, user=request.user)
 
-        if loan.status == LoanHistory.Status.RETURNED:
-            messages.warning(request, "この本はすでに返却されています。")
+        try:
+            reservation.cancel()
+        except ValidationError as e:
+            messages.warning(request, str(e))
             return redirect("user_libraries:my_library")
 
-        # 返却処理
-        loan.mark_returned()
-
-        loan.copy.status = Copy.Status.AVAILABLE
-        loan.copy.save()
-
-        messages.success(request, "返却が完了しました。")
+        messages.success(request, "予約のキャンセルが完了しました。")
         return redirect("user_libraries:my_library")
