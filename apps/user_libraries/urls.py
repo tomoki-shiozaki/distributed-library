@@ -4,6 +4,7 @@ from apps.user_libraries.views import (
     LoanReturnView,
     MyLibraryView,
     ReservationCancelView,
+    ReservationLoanView,
 )
 
 app_name = "user_libraries"
@@ -15,5 +16,10 @@ urlpatterns = [
         "reservations/<int:pk>/cancel/",
         ReservationCancelView.as_view(),
         name="reservation_cancel",
+    ),
+    path(
+        "reservations/<int:pk>/loan/",
+        ReservationLoanView.as_view(),
+        name="reservation_loan",
     ),
 ]

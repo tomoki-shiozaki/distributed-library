@@ -70,3 +70,18 @@ class ReservationCancelView(LoginRequiredMixin, IsGeneralMixin, View):
 
         messages.success(request, "予約のキャンセルが完了しました。")
         return redirect("user_libraries:my_library")
+
+
+class ReservationLoanView(LoginRequiredMixin, IsGeneralMixin, View):
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get("pk")
+        reservation = get_object_or_404(ReservationHistory, pk=pk, user=request.user)
+
+        try:
+            loan = reservation.convert_to_loan()
+        except ValidationError as e:
+            messages.warning(request, str(e))
+            return redirect("user_libraries:my_library")
+
+        messages.success(request, "予約から貸出への変更が完了しました。")
+        return redirect("user_libraries:my_library")

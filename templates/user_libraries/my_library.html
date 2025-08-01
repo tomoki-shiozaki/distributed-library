@@ -2,6 +2,17 @@
 {% block title %}マイライブラリ{% endblock title %}
 
 {% block content %}
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <div class="container">
     <h1 class="mb-4">📚 マイライブラリ</h1>
 
@@ -99,7 +110,14 @@
                                 </button>
                             </form>
                             {% if res.can_loan_now %}
-                            <a href="#" class="btn btn-sm btn-primary">貸出</a>
+                            <form method="post" action="{% url 'user_libraries:reservation_loan' res.pk %}"
+                                style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-primary"
+                                    onclick="return confirm('この予約を貸出に切り替えますか？');">
+                                    貸出
+                                </button>
+                            </form>
                             {% endif %}
                         </div>
                     </div>
