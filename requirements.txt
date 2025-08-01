@@ -10,8 +10,13 @@ django-cache-url==3.4.5
 django-crispy-forms==2.4
 environs==14.1.1
 idna==3.10
+iniconfig==2.1.0
 marshmallow==3.26.1
 packaging==24.2
+pluggy==1.6.0
+Pygments==2.19.2
+pytest==8.4.1
+pytest-django==4.11.1
 python-dotenv==1.1.0
 requests==2.32.4
 sqlparse==0.5.3
