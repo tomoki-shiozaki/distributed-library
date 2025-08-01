@@ -195,6 +195,19 @@ class ReservationHistory(models.Model):
             if overlapping.exists():
                 raise ValidationError("この蔵書には、重複する予約がすでに存在します。")
 
+            # 自分がその蔵書を貸出中かチェック
+            user_on_loan = (
+                LoanHistory.objects.select_for_update()
+                .filter(
+                    copy=copy_locked,
+                    user=user,
+                    status=LoanHistory.Status.ON_LOAN,
+                )
+                .exists()
+            )
+            if user_on_loan:
+                raise ValidationError("現在貸出中の蔵書は予約できません。")
+
             # 貸出中の期間と重複していないか確認（貸出中の期間が予約期間と重なるか）
             overlapping_loans = LoanHistory.objects.select_for_update().filter(
                 copy=copy_locked,
