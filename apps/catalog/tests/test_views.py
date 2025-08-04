@@ -1,11 +1,11 @@
 import datetime
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.urls import reverse
 
-from apps.catalog.models import Book, StorageLocation, Copy
+from apps.catalog.models import Book, Copy, StorageLocation
 
 User = get_user_model()
 LIBRARIAN = User.UserRole.LIBRARIAN
