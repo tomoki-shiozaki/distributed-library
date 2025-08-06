@@ -12,7 +12,7 @@ from apps.catalog.models import Book, Copy
 from apps.core.mixins import IsGeneralMixin
 from apps.library.forms import BookSearchForm, LoanForm, ReservationForm
 from apps.library.models import LoanHistory, ReservationHistory
-from apps.library.services import LoanService
+from apps.library.services import LoanService, ReservationService
 
 
 # Create your views here.
@@ -158,12 +158,12 @@ class ReservationCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
         end_date = form.cleaned_data["end_date"]
         user = self.request.user
 
-        if not ReservationHistory.can_make_reservation(user):
+        if not ReservationService.can_make_reservation(user):
             form.add_error(None, "予約可能な上限に達しています。")
             return self.form_invalid(form)
 
         try:
-            ReservationHistory.reserve_copy(
+            ReservationService.reserve_copy(
                 user=user,
                 copy=self.copy,
                 start_date=start_date,

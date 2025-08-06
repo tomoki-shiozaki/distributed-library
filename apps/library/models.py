@@ -104,84 +104,6 @@ class ReservationHistory(models.Model):
     def __str__(self):
         return f"{self.user} - {self.copy} ({self.status})"
 
-    @classmethod
-    def reserve_copy(cls, user, copy, start_date, end_date):
-        if not cls.can_make_reservation(user):
-            raise ValidationError("予約可能な上限に達しています。")
-
-        with transaction.atomic():
-            # 対象の蔵書をロック
-            copy_locked = Copy.objects.select_for_update().get(pk=copy.pk)
-
-            if copy_locked.status != Copy.Status.LOANED:
-                raise ValidationError("貸出中の蔵書のみ予約可能です。")
-
-            # 利用者自身の重複予約がないかチェック
-            existing_user_reservation = (
-                cls.objects.select_for_update()
-                .filter(
-                    copy=copy_locked,
-                    user=user,
-                    status=cls.Status.RESERVED,
-                )
-                .exists()
-            )
-            if existing_user_reservation:
-                raise ValidationError(
-                    "同じ利用者が同じ蔵書で重複する予約はできません。"
-                )
-
-            # 重複予約がないか確認
-            overlapping = cls.objects.select_for_update().filter(
-                copy=copy_locked,
-                status=cls.Status.RESERVED,
-                start_date__lte=end_date,
-                end_date__gte=start_date,
-            )
-            if overlapping.exists():
-                raise ValidationError("この蔵書には、重複する予約がすでに存在します。")
-
-            # 自分がその蔵書を貸出中かチェック
-            user_on_loan = (
-                LoanHistory.objects.select_for_update()
-                .filter(
-                    copy=copy_locked,
-                    user=user,
-                    status=LoanHistory.Status.ON_LOAN,
-                )
-                .exists()
-            )
-            if user_on_loan:
-                raise ValidationError("現在貸出中の蔵書は予約できません。")
-
-            # 貸出中の期間と重複していないか確認（貸出中の期間が予約期間と重なるか）
-            overlapping_loans = LoanHistory.objects.select_for_update().filter(
-                copy=copy_locked,
-                status=LoanHistory.Status.ON_LOAN,
-                loan_date__lte=end_date,
-                due_date__gte=start_date,
-            )
-            if overlapping_loans.exists():
-                raise ValidationError("貸出中の期間と重複する予約はできません。")
-
-            # 予約を保存
-            reservation = cls.objects.create(
-                user=user,
-                copy=copy_locked,
-                start_date=start_date,
-                end_date=end_date,
-                status=cls.Status.RESERVED,
-            )
-            return reservation
-
-    @classmethod
-    def can_make_reservation(cls, user):
-        max_reservations = settings.MAX_RESERVATION_COUNT
-        current_reservations = cls.objects.filter(
-            user=user, status=cls.Status.RESERVED
-        ).count()
-        return current_reservations < max_reservations
-
     def clean(self):
         super().clean()
 
@@ -246,3 +168,8 @@ class ReservationHistory(models.Model):
     class Meta:
         verbose_name = "予約履歴"
         verbose_name_plural = "予約履歴"
+        indexes = [
+            models.Index(fields=["user"]),
+            models.Index(fields=["copy"]),
+            models.Index(fields=["status"]),
+        ]
