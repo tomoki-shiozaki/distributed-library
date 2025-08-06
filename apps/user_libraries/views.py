@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 from apps.catalog.models import Copy
 from apps.core.mixins import IsGeneralMixin
 from apps.library.models import LoanHistory, ReservationHistory
+from apps.library.services import ReservationService
 
 
 # Create your views here.
@@ -75,7 +76,7 @@ class ReservationLoanView(LoginRequiredMixin, IsGeneralMixin, View):
         reservation = get_object_or_404(ReservationHistory, pk=pk, user=request.user)
 
         try:
-            loan = reservation.convert_to_loan()
+            loan = ReservationService.convert_to_loan(reservation)
         except ValidationError as e:
             messages.warning(request, str(e))
             return redirect("user_libraries:my_library")

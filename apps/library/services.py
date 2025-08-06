@@ -149,9 +149,9 @@ class ReservationService:
         )
         return reservation
 
-    @classmethod
+    @staticmethod
     @transaction.atomic
-    def convert_to_loan(cls, reservation, loan_date=None):
+    def convert_to_loan(reservation, loan_date=None):
         if reservation.status != ReservationHistory.Status.RESERVED:
             raise ValidationError("予約中のものしか貸出にできません。")
 

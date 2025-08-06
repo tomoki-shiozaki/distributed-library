@@ -33,21 +33,6 @@ class LoanHistory(models.Model):
     def __str__(self):
         return f"{self.user} - {self.copy} ({self.status})"
 
-    def mark_returned(self, return_date=None):
-        """
-        返却処理用のヘルパーメソッド。
-        - 返却日を設定
-        - ステータスを「返却済み」に変更
-        - 関連する Copy を AVAILABLE に更新
-        """
-        self.return_date = return_date or timezone.now().date()
-        self.status = self.Status.RETURNED
-        self.save()
-
-        # Copy 状態更新
-        self.copy.status = Copy.Status.AVAILABLE
-        self.copy.save()
-
     def clean(self):
         errors = {}
 
@@ -72,6 +57,21 @@ class LoanHistory(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def mark_returned(self, return_date=None):
+        """
+        返却処理用のヘルパーメソッド。
+        - 返却日を設定
+        - ステータスを「返却済み」に変更
+        - 関連する Copy を AVAILABLE に更新
+        """
+        self.return_date = return_date or timezone.now().date()
+        self.status = self.Status.RETURNED
+        self.save()
+
+        # Copy 状態更新
+        self.copy.status = Copy.Status.AVAILABLE
+        self.copy.save()
 
     class Meta:
         verbose_name = "貸出履歴"
@@ -141,29 +141,6 @@ class ReservationHistory(models.Model):
             raise ValidationError("予約中のものしかキャンセルできません。")
         self.status = self.Status.CANCELED
         self.save()
-
-    @transaction.atomic
-    def convert_to_loan(self, loan_date=None):
-        if self.status != self.Status.RESERVED:
-            raise ValidationError("予約中のものしか貸出にできません。")
-
-        loan_date = loan_date or timezone.now().date()
-        if loan_date < self.start_date:
-            raise ValidationError("貸出日は予約開始日より前にはできません。")
-        if loan_date > self.end_date:
-            raise ValidationError("貸出日は予約終了日より後にはできません。")
-        due_date = self.end_date
-        loan = LoanHistory.loan_copy(
-            user=self.user,
-            copy=self.copy,
-            loan_date=loan_date,
-            due_date=due_date,
-        )
-
-        self.status = self.Status.COMPLETED
-        self.save()
-
-        return loan
 
     class Meta:
         verbose_name = "予約履歴"
