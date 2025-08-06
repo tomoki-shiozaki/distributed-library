@@ -56,7 +56,7 @@ def due(today):
     return today + timedelta(days=7)
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)  # トランザクション対応のDBアクセスを許可
 class TestLoanService:
 
     def test_can_borrow_more_true(self, general):

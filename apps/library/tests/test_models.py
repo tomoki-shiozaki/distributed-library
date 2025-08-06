@@ -55,7 +55,7 @@ def due(today):
     return today + timedelta(days=7)
 
 
-@pytest.mark.django_db(transaction=True)  # トランザクション対応のDBアクセスを許可
+@pytest.mark.django_db
 class TestLoanHistory:
 
     def test_mark_returned_sets_status_and_date(self, general, copy, today, due):
