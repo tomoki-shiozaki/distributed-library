@@ -33,74 +33,20 @@ class LoanHistory(models.Model):
     def __str__(self):
         return f"{self.user} - {self.copy} ({self.status})"
 
-    @classmethod
-    def loan_copy(cls, user, copy, loan_date, due_date):
-        if not cls.can_borrow_more(user):
-            raise ValidationError("貸出可能な上限に達しています。")
-
-        with transaction.atomic():
-            # 蔵書ロック
-            copy_locked = Copy.objects.select_for_update().get(pk=copy.pk)
-
-            if copy_locked.status == Copy.Status.LOANED:
-                raise ValidationError("この蔵書は既に貸出中です。")
-
-            # 予約チェック
-            overlapping_reservation = (
-                ReservationHistory.objects.select_for_update()
-                .filter(
-                    copy=copy_locked,
-                    status=ReservationHistory.Status.RESERVED,
-                    start_date__lte=due_date,
-                    end_date__gte=loan_date,
-                )
-                .exclude(user=user)
-            )
-            if overlapping_reservation.exists():
-                raise ValidationError(
-                    "他の利用者による予約が存在するため、貸出できません。"
-                )
-
-            # 利用者自身の予約がある場合、貸出により予約は実質完了とみなし、状態を更新する
-            user_reservations = ReservationHistory.objects.select_for_update().filter(
-                copy=copy_locked,
-                user=user,
-                status=ReservationHistory.Status.RESERVED,
-            )
-            for reservation in user_reservations:
-                reservation.status = ReservationHistory.Status.COMPLETED
-                reservation.save()
-
-            # 貸出履歴作成
-            loan_history = cls.objects.create(
-                user=user,
-                copy=copy_locked,
-                loan_date=loan_date,
-                due_date=due_date,
-                status=cls.Status.ON_LOAN,
-            )
-
-            # 蔵書の状態更新
-            copy_locked.status = Copy.Status.LOANED
-            copy_locked.save()
-
-            return loan_history
-
-    @classmethod
-    def can_borrow_more(cls, user):
-        max_borrow = settings.MAX_LOAN_COUNT
-        current_loans = cls.objects.filter(user=user, status=cls.Status.ON_LOAN).count()
-        return current_loans < max_borrow
-
     def mark_returned(self, return_date=None):
         """
         返却処理用のヘルパーメソッド。
-        引数がなければ今日を返却日に設定。
-        statusを返却済みに更新し、保存する。
+        - 返却日を設定
+        - ステータスを「返却済み」に変更
+        - 関連する Copy を AVAILABLE に更新
         """
         self.return_date = return_date or timezone.now().date()
         self.status = self.Status.RETURNED
         self.save()
+
+        # Copy 状態更新
+        self.copy.status = Copy.Status.AVAILABLE
+        self.copy.save()
 
     def clean(self):
         errors = {}

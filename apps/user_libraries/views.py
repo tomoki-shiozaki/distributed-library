@@ -50,9 +50,6 @@ class LoanReturnView(LoginRequiredMixin, IsGeneralMixin, View):
         # 返却処理
         loan.mark_returned()
 
-        loan.copy.status = Copy.Status.AVAILABLE
-        loan.copy.save()
-
         messages.success(request, "返却が完了しました。")
         return redirect("user_libraries:my_library")
 

@@ -12,6 +12,7 @@ from apps.catalog.models import Book, Copy
 from apps.core.mixins import IsGeneralMixin
 from apps.library.forms import BookSearchForm, LoanForm, ReservationForm
 from apps.library.models import LoanHistory, ReservationHistory
+from apps.library.services import LoanService
 
 
 # Create your views here.
@@ -110,7 +111,7 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
             return self.form_invalid(form)
 
         try:
-            LoanHistory.loan_copy(user, self.copy, loan_date, due_date)
+            LoanService.loan_copy(user, self.copy, loan_date, due_date)
         except ValidationError as e:
             form.add_error(None, e.message)
             return self.form_invalid(form)

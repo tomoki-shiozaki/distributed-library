@@ -2,7 +2,6 @@ import datetime
 from datetime import timedelta
 
 import pytest
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -59,64 +58,6 @@ def due(today):
 @pytest.mark.django_db(transaction=True)  # トランザクション対応のDBアクセスを許可
 class TestLoanHistory:
 
-    def test_can_borrow_more_true(self, general):
-        assert LoanHistory.can_borrow_more(general) is True
-
-    def test_can_borrow_more_false(self, general, copy, today, due):
-        settings.MAX_LOAN_COUNT = 1
-        LoanHistory.objects.create(
-            user=general,
-            copy=copy,
-            loan_date=today,
-            due_date=due,
-            status=LoanHistory.Status.ON_LOAN,
-        )
-        assert LoanHistory.can_borrow_more(general) is False
-
-    def test_loan_copy_success(self, general, copy, today, due):
-        loan = LoanHistory.loan_copy(
-            user=general, copy=copy, loan_date=today, due_date=due
-        )
-        assert loan.status == LoanHistory.Status.ON_LOAN
-        copy.refresh_from_db()
-        assert copy.status == Copy.Status.LOANED
-
-    def test_loan_copy_fails_when_copy_already_loaned(self, general, copy, today, due):
-        copy.status = Copy.Status.LOANED
-        copy.save()
-        with pytest.raises(ValidationError, match="既に貸出中"):
-            LoanHistory.loan_copy(
-                user=general, copy=copy, loan_date=today, due_date=due
-            )
-
-    def test_loan_copy_fails_when_other_user_has_reservation(
-        self, general, copy, today, due
-    ):
-        other_user = User.objects.create_user(username="otheruser")
-        ReservationHistory.objects.create(
-            user=other_user,
-            copy=copy,
-            start_date=today,
-            end_date=due,
-            status=ReservationHistory.Status.RESERVED,
-        )
-        with pytest.raises(ValidationError, match="予約が存在"):
-            LoanHistory.loan_copy(
-                user=general, copy=copy, loan_date=today, due_date=due
-            )
-
-    def test_loan_copy_completes_own_reservation(self, general, copy, today, due):
-        ReservationHistory.objects.create(
-            user=general,
-            copy=copy,
-            start_date=today,
-            end_date=due,
-            status=ReservationHistory.Status.RESERVED,
-        )
-        LoanHistory.loan_copy(user=general, copy=copy, loan_date=today, due_date=due)
-        updated_res = ReservationHistory.objects.get(user=general, copy=copy)
-        assert updated_res.status == ReservationHistory.Status.COMPLETED
-
     def test_mark_returned_sets_status_and_date(self, general, copy, today, due):
         loan = LoanHistory.objects.create(
             user=general,
@@ -127,8 +68,12 @@ class TestLoanHistory:
         )
         return_date = today
         loan.mark_returned(return_date=return_date)
+
         assert loan.status == LoanHistory.Status.RETURNED
         assert loan.return_date == return_date
+
+        copy.refresh_from_db()
+        assert copy.status == Copy.Status.AVAILABLE
 
     def test_clean_valid_dates(self, general, copy, today):
         loan = LoanHistory(
