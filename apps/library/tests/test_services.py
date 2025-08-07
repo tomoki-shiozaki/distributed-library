@@ -94,6 +94,23 @@ class TestLoanService:
         copy.refresh_from_db()
         assert copy.status == Copy.Status.LOANED
 
+    def test_loan_copy_succeeds_when_reservation_period_does_not_overlap(
+        self, general, copy, today, due
+    ):
+        # 他人の予約が期間外
+        other_user = User.objects.create_user(username="otheruser")
+        ReservationHistory.objects.create(
+            user=other_user,
+            copy=copy,
+            start_date=due + timedelta(days=1),  # 貸出期間の後
+            end_date=due + timedelta(days=10),
+            status=ReservationHistory.Status.RESERVED,
+        )
+        loan = LoanService.loan_copy(
+            user=general, copy=copy, loan_date=today, due_date=due
+        )
+        assert loan.status == LoanHistory.Status.ON_LOAN
+
     def test_loan_copy_fails_when_user_reaches_max_loans(
         self, general, copy_factory, today, due, settings
     ):
