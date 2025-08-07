@@ -84,12 +84,52 @@ class TestLoanHistory:
         )
         loan.full_clean()  # Should not raise
 
+    def test_clean_due_date_max_boundary(self, general, copy, today):
+        loan = LoanHistory(
+            user=general,
+            copy=copy,
+            loan_date=today,
+            due_date=today + timedelta(days=14),
+        )
+        loan.full_clean()
+
+    def test_clean_return_date_after_loan_date_valid(self, general, copy, today):
+        loan = LoanHistory(
+            user=general,
+            copy=copy,
+            loan_date=today - timedelta(days=3),
+            due_date=today + timedelta(days=7),
+            return_date=today - timedelta(days=2),  # 貸出日の翌日
+        )
+        loan.full_clean()
+
+    def test_clean_return_date_today_is_valid(self, general, copy, today, due):
+        loan = LoanHistory(
+            user=general,
+            copy=copy,
+            loan_date=today,
+            due_date=due,
+            return_date=today,
+        )
+        loan.full_clean()
+
     def test_clean_invalid_due_date(self, general, copy, today):
         loan = LoanHistory(
             user=general,
             copy=copy,
             loan_date=today,
             due_date=today - timedelta(days=1),
+        )
+        with pytest.raises(ValidationError) as e:
+            loan.full_clean()
+        assert "due_date" in e.value.message_dict
+
+    def test_clean_due_date_exceeds_max_days(self, general, copy, today):
+        loan = LoanHistory(
+            user=general,
+            copy=copy,
+            loan_date=today,
+            due_date=today + timedelta(days=15),  # 14日を超える
         )
         with pytest.raises(ValidationError) as e:
             loan.full_clean()
@@ -106,3 +146,25 @@ class TestLoanHistory:
         with pytest.raises(ValidationError) as e:
             loan.full_clean()
         assert "return_date" in e.value.message_dict
+
+    def test_clean_return_date_in_future_is_invalid(self, general, copy, today, due):
+        loan = LoanHistory(
+            user=general,
+            copy=copy,
+            loan_date=today,
+            due_date=due,
+            return_date=today + timedelta(days=1),  # 今日より未来
+        )
+        with pytest.raises(ValidationError) as e:
+            loan.full_clean()
+        assert "return_date" in e.value.message_dict
+
+    def test_save_triggers_validation(self, general, copy, today):
+        loan = LoanHistory(
+            user=general,
+            copy=copy,
+            loan_date=today,
+            due_date=today - timedelta(days=1),  # 不正
+        )
+        with pytest.raises(ValidationError):
+            loan.save()
