@@ -12,7 +12,8 @@ from apps.catalog.models import Book, Copy
 from apps.core.mixins import IsGeneralMixin
 from apps.library.forms import BookSearchForm, LoanForm, ReservationForm
 from apps.library.models import LoanHistory, ReservationHistory
-from apps.library.services import LoanService, ReservationService
+from apps.library.services.loan_service import LoanService
+from apps.library.services.reservation_service import ReservationService
 
 
 # Create your views here.

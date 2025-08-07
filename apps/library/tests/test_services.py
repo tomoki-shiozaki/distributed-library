@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from apps.catalog.models import Book, Copy, StorageLocation
 from apps.library.models import LoanHistory, ReservationHistory
-from apps.library.services import LoanService
+from apps.library.services.loan_service import LoanService
 
 User = get_user_model()
 LIBRARIAN = User.UserRole.LIBRARIAN
