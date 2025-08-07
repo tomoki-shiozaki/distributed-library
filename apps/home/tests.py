@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
+
 from apps.accounts.models import CustomUser
 
 GENERAL = CustomUser.UserRole.GENERAL
@@ -46,10 +47,8 @@ class TopPageViewTests(TestCase):
         self.client.login(username="user", password="testpass")
         response = self.client.get(self.url)
         self.assertContains(response, "一般ユーザー向けの案内")
-        self.assertContains(response, f'href="{reverse("library:search")}"')
-        self.assertContains(
-            response, f'href="{reverse("user_libraries:user_loan_list")}"'
-        )
+        self.assertContains(response, f'href="{reverse("library:book_search")}"')
+        self.assertContains(response, f'href="{reverse("user_libraries:my_library")}"')
 
     def test_top_page_for_librarian_user(self):
         librarian = get_user_model().objects.create_user(

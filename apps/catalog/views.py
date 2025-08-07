@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from apps.core.mixins import IsLibrarianMixin
 from apps.catalog.forms import ISBNCheckForm
 from apps.catalog.models import Book, Copy
+from apps.catalog.utils import parse_published_date
 
 
 # Create your views here.
@@ -34,8 +35,10 @@ class BookCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
         "author",
         "publisher",
         "published_date",
+        "published_date_precision",
         "image_url",
         "edition",
+        "description",
     ]
     template_name = "catalog/book_form.html"
 
@@ -50,6 +53,10 @@ class BookCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
                 data = response.json()
                 if data["totalItems"] > 0:
                     volume_info = data["items"][0]["volumeInfo"]
+                    published_date_str = volume_info.get("publishedDate", "")
+                    published_date, published_date_precision = parse_published_date(
+                        published_date_str
+                    )
                     # 初期値としてフォームに埋め込む
                     initial.update(
                         {
@@ -59,10 +66,12 @@ class BookCreateView(LoginRequiredMixin, IsLibrarianMixin, CreateView):
                                 volume_info.get("authors", [])
                             ),  # 複数の著者をカンマ区切りの文字列に変換
                             "publisher": volume_info.get("publisher", ""),
-                            "published_date": volume_info.get("publishedDate", ""),
+                            "published_date": published_date,
+                            "published_date_precision": published_date_precision,
                             "image_url": volume_info.get("imageLinks", {}).get(
                                 "thumbnail", ""
                             ),
+                            "description": volume_info.get("description", ""),
                         }
                     )
                 else:

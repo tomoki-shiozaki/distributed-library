@@ -1,8 +1,9 @@
-from django.test import TestCase
 import datetime
+
+from django.test import TestCase
 from django.utils import timezone
 
-from apps.catalog.models import Book, StorageLocation, Copy
+from apps.catalog.models import Book, Copy, StorageLocation
 
 
 # Create your tests here.

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}蔵書の貸出{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">「{{ book.title }}」の貸出</h1>
+
+    <div class="row">
+        <!-- 状況表示 -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    現在の貸出・予約状況
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">貸出状況</h5>
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for loan in loan_periods %}
+                        <li class="list-group-item">{{ loan.loan_date }} 〜 {{ loan.due_date }}</li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">現在貸出可能です</li>
+                        {% endfor %}
+                    </ul>
+
+                    <h5 class="card-title">予約状況</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for reservation in reservation_periods %}
+                        <li class="list-group-item">{{ reservation.start_date }} 〜 {{ reservation.end_date }}</li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">予約はありません</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 貸出フォーム -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    貸出フォーム
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">※ 返却予定日は貸出日（本日）から14日以内の日付を指定してください。</p>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {{ form|crispy }}
+
+                        <div class="d-flex justify-content-start">
+                            <button type="submit" class="btn btn-success me-2">貸出する</button>
+                            <a href="{% url 'library:book_detail' book.pk %}"
+                                class="btn btn-outline-secondary">キャンセル</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

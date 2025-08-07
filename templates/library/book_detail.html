@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}本の詳細・貸出状況{% endblock title %}
+{% block content %}
+
+<a href="{% url 'library:book_search' %}?{{ request.GET.urlencode }}" class="btn btn-outline-secondary mb-3">
+    ← 検索結果に戻る
+</a>
+
+{% if messages %}
+  <div>
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- 書籍情報 -->
+<div class="mb-4 d-flex align-items-start">
+    {% if book.image_url %}
+    <div
+        style="width: 150px; height: 220px; margin-right: 20px; background-color: #eee; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px;">
+        <img src="{{ book.image_url }}" alt="{{ book.title }} の書影" class="img-fluid rounded shadow-sm"
+            style="max-width: 100%; max-height: 100%; object-fit: contain;">
+    </div>
+    {% endif %}
+    <div>
+        <h2 class="h5">書籍情報</h2>
+        <div class="table-responsive" style="max-width: 500px;">
+            <table class="table table-bordered table-sm mb-0">
+                <tbody>
+                    <tr>
+                        <th scope="row">タイトル</th>
+                        <td><strong>{{ book.title }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">著者</th>
+                        <td>{{ book.author }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">出版社</th>
+                        <td>{{ book.publisher }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">出版日</th>
+                        <td>{{ book.published_date|default:"（未設定）" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 蔵書一覧 -->
+<h2>所蔵</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>保存場所</th>
+            <th>状態</th>
+            <th>登録日</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for copy in copies %}
+        <tr>
+            <td>{{ copy.location.name }}</td>
+            <td>{{ copy.get_status_display }}</td>
+            <td>{{ copy.registered_date }}</td>
+            <td>
+                {% if copy.status == COPY_STATUS.AVAILABLE %}
+                <a href="{% url 'library:loan_create' copy.pk %}" class="btn btn-primary btn-sm">貸出</a>
+                {% endif %}
+                {% if copy.status == COPY_STATUS.LOANED %}
+                <a href="{% url 'library:reservation_create' copy.pk %}" class="btn btn-outline-primary btn-sm">予約</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">この本の蔵書はありません。</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- 書籍の詳細情報 -->
+<h4 class="mt-4">書籍の詳細情報</h4>
+<div class="table-responsive" style="max-width: 600px;">
+    <table class="table table-bordered table-sm">
+        <tbody>
+            <tr>
+                <th scope="row">ISBN</th>
+                <td>{{ book.isbn }}</td>
+            </tr>
+            <tr>
+                <th scope="row">版数</th>
+                <td>
+                    {% if book.edition %}
+                    第{{ book.edition }}版
+                    {% else %}
+                    （未設定）
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">出版日の精度</th>
+                <td>{{ book.get_published_date_precision_display }}</td>
+            </tr>
+            <tr>
+                <th scope="row">内容紹介</th>
+                <td>{{ book.description|linebreaksbr|default:"（なし）" }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% endblock content %}

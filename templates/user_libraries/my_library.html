@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}マイライブラリ{% endblock title %}
+
+{% block content %}
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container">
+    <h1 class="mb-4">📚 マイライブラリ</h1>
+
+    <!-- 貸出中の本 -->
+    <div class="card mb-5 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">📖 現在貸出中の本</h5>
+        </div>
+        <div class="card-body">
+            {% if loans %}
+            <div class="list-group">
+                {% for loan in loans %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <!-- 書影 -->
+                        <div class="flex-shrink-0 me-3">
+                            {% if loan.copy.book.image_url %}
+                            <img src="{{ loan.copy.book.image_url }}" alt="書影"
+                                style="width: 60px; height: 90px; object-fit: cover; border-radius: 4px;">
+                            {% else %}
+                            <div
+                                style="width: 60px; height: 90px; background-color: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                                <span class="text-muted small">No Image</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- 本文 -->
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ loan.copy.book.title }}</h6>
+                            <small class="text-muted">著者: {{ loan.copy.book.author }}</small><br>
+                            <small class="text-muted">保存場所: {{ loan.copy.location.name }}</small><br>
+                            <span class="badge bg-warning text-dark mt-1">返却期限: {{ loan.due_date|date:"Y年m月d日" }}</span>
+                        </div>
+                        <div>
+                            <form method="post" action="{% url 'user_libraries:loan_return' loan.pk %}"
+                                style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('この本を返却しますか？');">
+                                    返却
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">現在貸出中の本はありません。</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 予約中の本 -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">📝 予約中の本</h5>
+        </div>
+        <div class="card-body">
+            {% if reservations %}
+            <div class="list-group">
+                {% for res in reservations %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <!-- 書影 -->
+                        <div class="flex-shrink-0 me-3">
+                            {% if res.copy.book.image_url %}
+                            <img src="{{ res.copy.book.image_url }}" alt="書影"
+                                style="width: 60px; height: 90px; object-fit: cover; border-radius: 4px;">
+                            {% else %}
+                            <div
+                                style="width: 60px; height: 90px; background-color: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                                <span class="text-muted small">No Image</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- 書籍情報 -->
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ res.copy.book.title }}</h6>
+                            <small class="text-muted">著者: {{ res.copy.book.author }}</small><br>
+                            <small class="text-muted">保存場所: {{ res.copy.location.name }}</small><br>
+                            <span class="badge bg-info text-dark mt-1">
+                                予約期間: {{ res.start_date|date:"Y年m月d日" }} ～ {{ res.end_date|date:"Y年m月d日" }}
+                            </span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <form method="post" action="{% url 'user_libraries:reservation_cancel' res.pk %}"
+                                style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('予約を取り消しますか？');">
+                                    予約取り消し
+                                </button>
+                            </form>
+                            {% if res.can_loan_now %}
+                            <form method="post" action="{% url 'user_libraries:reservation_loan' res.pk %}"
+                                style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-primary"
+                                    onclick="return confirm('この予約を貸出に切り替えますか？');">
+                                    貸出
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <p class="text-muted">現在予約中の本はありません。</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

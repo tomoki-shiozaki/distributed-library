@@ -1,11 +1,11 @@
 import datetime
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.urls import reverse
 
-from apps.catalog.models import Book, StorageLocation, Copy
+from apps.catalog.models import Book, Copy, StorageLocation
 
 User = get_user_model()
 LIBRARIAN = User.UserRole.LIBRARIAN
@@ -107,7 +107,10 @@ class TestBookCreateView(TestCase):
         self.assertEqual(initial["title"], "Test Book")
         self.assertIn("Author1, Author2", initial["author"])
         self.assertEqual(initial["publisher"], "Pub")
-        self.assertEqual(initial["published_date"], "2020-01-01")
+        self.assertEqual(initial["published_date"], datetime.date(2020, 1, 1))
+        self.assertEqual(
+            initial["published_date_precision"], Book.PublishedDatePrecision.DAY
+        )
         self.assertEqual(initial["image_url"], "http://image.jpg")
 
     @patch("apps.catalog.views.requests.get")
@@ -143,6 +146,7 @@ class TestBookCreateView(TestCase):
             "author": "A B",
             "publisher": "Pub",
             "published_date": "2025-01-01",
+            "published_date_precision": Book.PublishedDatePrecision.DAY,
             "image_url": "http://example.com/image.jpg",
             "edition": 2,
         }
