@@ -106,7 +106,7 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
         loan_date = self.today
         due_date = form.cleaned_data["due_date"]
 
-        if not LoanHistory.can_borrow_more(user):
+        if not LoanService.can_borrow_more(user):
             form.add_error(None, "貸出可能な上限に達しています。")
             return self.form_invalid(form)
 
