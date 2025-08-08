@@ -52,16 +52,6 @@ def copy(db, book, location):
 
 
 @pytest.fixture
-def today():
-    return timezone.now().date()
-
-
-@pytest.fixture
-def due(today):
-    return today + timedelta(days=7)
-
-
-@pytest.fixture
 def reserved_copy(copy):
     copy.status = Copy.Status.LOANED
     copy.save()
@@ -93,8 +83,31 @@ def loaned_copy_factory(copy_factory):
     return _factory
 
 
+@pytest.fixture
+def today():
+    return timezone.now().date()
+
+
 @pytest.mark.django_db(transaction=True)
 class TestReservationService:
+
+    def test_can_make_reservation_true(self, general_user):
+        assert ReservationService.can_make_reservation(general_user) is True
+
+    def test_can_make_reservation_false(
+        self, general_user, reserved_copy, today, settings
+    ):
+        settings.MAX_RESERVATION_COUNT = 1
+
+        ReservationHistory.objects.create(
+            user=general_user,
+            copy=reserved_copy,
+            start_date=today,
+            end_date=today + timedelta(days=3),
+            status=ReservationHistory.Status.RESERVED,
+        )
+
+        assert ReservationService.can_make_reservation(general_user) is False
 
     def test_reservation_fails_if_user_exceeds_limit(
         self, general_user, loaned_copy_factory, today, settings
