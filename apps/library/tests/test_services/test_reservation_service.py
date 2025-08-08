@@ -221,8 +221,8 @@ class TestReservationService:
             ReservationService.reserve_copy(
                 user=general_user,
                 copy=reserved_copy,
-                start_date=today + timedelta(days=2),
-                end_date=today + timedelta(days=6),
+                start_date=today + timedelta(days=6),
+                end_date=today + timedelta(days=8),
             )
         assert "同じ利用者が同じ蔵書で重複する予約はできません。" in str(excinfo.value)
 
@@ -261,7 +261,7 @@ class TestReservationService:
             ReservationService.reserve_copy(
                 user=general_user,
                 copy=reserved_copy,
-                start_date=today + timedelta(days=1),
+                start_date=today + timedelta(days=6),
                 end_date=today + timedelta(days=7),
             )
         assert "現在貸出中の蔵書は予約できません。" in str(excinfo.value)
