@@ -58,23 +58,6 @@ def due(today):
 @pytest.mark.django_db
 class TestLoanHistory:
 
-    def test_mark_returned_sets_status_and_date(self, general, copy, today, due):
-        loan = LoanHistory.objects.create(
-            user=general,
-            copy=copy,
-            loan_date=today,
-            due_date=due,
-            status=LoanHistory.Status.ON_LOAN,
-        )
-        return_date = today
-        loan.mark_returned(return_date=return_date)
-
-        assert loan.status == LoanHistory.Status.RETURNED
-        assert loan.return_date == return_date
-
-        copy.refresh_from_db()
-        assert copy.status == Copy.Status.AVAILABLE
-
     def test_clean_valid_dates(self, general, copy, today):
         loan = LoanHistory(
             user=general,
@@ -159,6 +142,11 @@ class TestLoanHistory:
             loan.full_clean()
         assert "return_date" in e.value.message_dict
 
+    def test_save_calls_full_clean(self, general, copy, today, due):
+        loan = LoanHistory(user=general, copy=copy, loan_date=today, due_date=due)
+        loan.save()
+        assert LoanHistory.objects.filter(pk=loan.pk).exists()
+
     def test_save_triggers_validation(self, general, copy, today):
         loan = LoanHistory(
             user=general,
@@ -168,3 +156,20 @@ class TestLoanHistory:
         )
         with pytest.raises(ValidationError):
             loan.save()
+
+    def test_mark_returned_sets_status_and_date(self, general, copy, today, due):
+        loan = LoanHistory.objects.create(
+            user=general,
+            copy=copy,
+            loan_date=today,
+            due_date=due,
+            status=LoanHistory.Status.ON_LOAN,
+        )
+        return_date = today
+        loan.mark_returned(return_date=return_date)
+
+        assert loan.status == LoanHistory.Status.RETURNED
+        assert loan.return_date == return_date
+
+        copy.refresh_from_db()
+        assert copy.status == Copy.Status.AVAILABLE

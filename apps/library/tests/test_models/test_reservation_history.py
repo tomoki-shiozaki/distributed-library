@@ -86,7 +86,7 @@ class TestReservationHistory:
             end_date=today + timedelta(days=5),
             status=ReservationHistory.Status.RESERVED,
         )
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(ValidationError) as excinfo:  # exception information
             reservation.full_clean()
         assert "予約開始日は本日以降の日付を指定してください。" in str(excinfo.value)
 
@@ -156,6 +156,17 @@ class TestReservationHistory:
         )
         reservation.save()
         assert ReservationHistory.objects.filter(pk=reservation.pk).exists()
+
+    def test_save_triggers_validation(self, general_user, copy, today):
+        reservation = ReservationHistory(
+            user=general_user,
+            copy=copy,
+            start_date=today - timedelta(days=1),
+            end_date=today + timedelta(days=5),
+            status=ReservationHistory.Status.RESERVED,
+        )
+        with pytest.raises(ValidationError):
+            reservation.save()
 
     def test_cancel_changes_status(self, general_user, copy, today):
         reservation = ReservationHistory.objects.create(
