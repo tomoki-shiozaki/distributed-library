@@ -109,9 +109,67 @@ class TestReservationService:
 
         assert ReservationService.can_make_reservation(general_user) is False
 
+    def test_successful_reservation(self, general_user, reserved_copy, today):
+
+        reservation = ReservationService.reserve_copy(
+            user=general_user,
+            copy=reserved_copy,
+            start_date=today + timedelta(days=10),
+            end_date=today + timedelta(days=12),
+        )
+
+        assert reservation.pk is not None
+        assert reservation.user == general_user
+        assert reservation.copy == reserved_copy
+        assert reservation.status == ReservationHistory.Status.RESERVED
+
+    def test_reservation_succeeds_if_no_overlap(
+        self, general_user, other_user, reserved_copy, today
+    ):
+        # 他のユーザーの予約（期間: today +1〜+3日）を作成
+        ReservationHistory.objects.create(
+            user=other_user,
+            copy=reserved_copy,
+            start_date=today + timedelta(days=1),
+            end_date=today + timedelta(days=3),
+            status=ReservationHistory.Status.RESERVED,
+        )
+        # general_userが被っていない期間で予約できることを確認（期間: today +10〜+12日）
+        reservation = ReservationService.reserve_copy(
+            user=general_user,
+            copy=reserved_copy,
+            start_date=today + timedelta(days=10),
+            end_date=today + timedelta(days=12),
+        )
+        assert reservation.pk is not None
+
+    def test_reservation_succeeds_if_no_overlap_with_loan(
+        self, general_user, other_user, reserved_copy, today
+    ):
+        # 他のユーザーが予約対象の蔵書を貸出中（貸出期間: today〜today+5日）
+        LoanHistory.objects.create(
+            user=other_user,
+            copy=reserved_copy,
+            loan_date=today,
+            due_date=today + timedelta(days=5),
+            status=LoanHistory.Status.ON_LOAN,
+        )
+        # general_userが貸出期間と被っていない予約期間（today+10〜today+12日）で予約できることを確認
+        reservation = ReservationService.reserve_copy(
+            user=general_user,
+            copy=reserved_copy,
+            start_date=today + timedelta(days=10),
+            end_date=today + timedelta(days=12),
+        )
+        assert reservation.pk is not None
+
     def test_reservation_fails_if_user_exceeds_limit(
         self, general_user, loaned_copy_factory, today, settings
     ):
+        """
+        ユーザーの予約件数が上限に達している場合、
+        新たな予約を作成しようとすると ValidationError が発生することを確認するテスト。
+        """
         settings.MAX_RESERVATION_COUNT = 1
 
         # 既に予約が1件ある場合（予約対象は貸出中状態のコピー）
@@ -227,19 +285,6 @@ class TestReservationService:
                 end_date=today + timedelta(days=7),
             )
         assert "貸出中の期間と重複する予約はできません。" in str(excinfo.value)
-
-    def test_successful_reservation(self, general_user, reserved_copy, today):
-        reservation = ReservationService.reserve_copy(
-            user=general_user,
-            copy=reserved_copy,
-            start_date=today + timedelta(days=10),
-            end_date=today + timedelta(days=12),
-        )
-
-        assert reservation.pk is not None
-        assert reservation.user == general_user
-        assert reservation.copy == reserved_copy
-        assert reservation.status == ReservationHistory.Status.RESERVED
 
 
 @pytest.mark.django_db(transaction=True)
