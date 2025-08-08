@@ -290,33 +290,6 @@ class TestReservationService:
 @pytest.mark.django_db(transaction=True)
 class TestConvertToLoan:
 
-    def test_convert_fails_if_not_reserved(self, general_user, reserved_copy, today):
-        reservation = ReservationHistory.objects.create(
-            user=general_user,
-            copy=reserved_copy,
-            start_date=today,
-            end_date=today + timedelta(days=5),
-            status=ReservationHistory.Status.CANCELED,
-        )
-
-        with pytest.raises(ValidationError) as excinfo:
-            ReservationService.convert_to_loan(reservation)
-        assert "予約中のものしか貸出にできません。" in str(excinfo.value)
-
-    def test_convert_fails_if_loan_date_out_of_range(
-        self, general_user, reserved_copy, today
-    ):
-        reservation = ReservationHistory.objects.create(
-            user=general_user,
-            copy=reserved_copy,
-            start_date=today + timedelta(days=1),
-            end_date=today + timedelta(days=5),
-            status=ReservationHistory.Status.RESERVED,
-        )
-
-        with pytest.raises(ValidationError):
-            ReservationService.convert_to_loan(reservation, loan_date=today)
-
     def test_convert_successfully(self, mocker, general_user, reserved_copy, today):
         reservation = ReservationHistory.objects.create(
             user=general_user,
@@ -338,3 +311,50 @@ class TestConvertToLoan:
         assert loan.pk == 999
         reservation.refresh_from_db()
         assert reservation.status == ReservationHistory.Status.COMPLETED
+
+    def test_convert_fails_if_not_reserved(self, general_user, reserved_copy, today):
+        reservation = ReservationHistory.objects.create(
+            user=general_user,
+            copy=reserved_copy,
+            start_date=today,
+            end_date=today + timedelta(days=5),
+            status=ReservationHistory.Status.CANCELED,
+        )
+
+        with pytest.raises(ValidationError) as excinfo:
+            ReservationService.convert_to_loan(reservation)
+        assert "予約中のものしか貸出にできません。" in str(excinfo.value)
+
+    def test_convert_fails_if_loan_date_before_reservation_period(
+        self, general_user, reserved_copy, today
+    ):
+        reservation = ReservationHistory.objects.create(
+            user=general_user,
+            copy=reserved_copy,
+            start_date=today + timedelta(days=1),
+            end_date=today + timedelta(days=5),
+            status=ReservationHistory.Status.RESERVED,
+        )
+
+        with pytest.raises(ValidationError) as excinfo:
+            ReservationService.convert_to_loan(reservation, loan_date=today)
+        assert "貸出日は予約開始日より前にはできません。" in str(excinfo.value)
+
+    def test_convert_fails_if_loan_date_after_reservation_period(
+        self, general_user, reserved_copy, today
+    ):
+        reservation = ReservationHistory.objects.create(
+            user=general_user,
+            copy=reserved_copy,
+            start_date=today,
+            end_date=today + timedelta(days=1),
+            status=ReservationHistory.Status.RESERVED,
+        )
+
+        # 予約期間の終了日を過ぎた日付で貸出しようとする
+        loan_date = today + timedelta(days=6)
+
+        with pytest.raises(ValidationError) as excinfo:
+            ReservationService.convert_to_loan(reservation, loan_date=loan_date)
+
+        assert "貸出日は予約終了日より後にはできません。" in str(excinfo.value)
