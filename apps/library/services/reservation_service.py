@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from apps.catalog.models import Copy
 from apps.library.models import LoanHistory, ReservationHistory
+from apps.library.services.loan_service import LoanService
 
 
 class ReservationService:
@@ -98,7 +99,7 @@ class ReservationService:
             raise ValidationError("貸出日は予約終了日より後にはできません。")
 
         due_date = reservation.end_date
-        loan = LoanHistory.loan_copy(
+        loan = LoanService.loan_copy(
             user=reservation.user,
             copy=reservation.copy,
             loan_date=loan_date,
