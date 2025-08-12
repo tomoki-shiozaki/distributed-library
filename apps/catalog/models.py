@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
 
 
@@ -10,9 +11,15 @@ class Book(models.Model):
         MONTH = "month", "年月"
         DAY = "day", "年月日"
 
+    isbn_validator = RegexValidator(
+        regex=r"^\d{13}$",
+        message="ISBNは13桁の数字で入力してください（ハイフンなし）。",
+    )
+
     isbn = models.CharField(
         max_length=13,
         unique=True,
+        validators=[isbn_validator],
         verbose_name="ISBN",
         help_text="13桁の数字をハイフンなしで入力してください。",
     )
