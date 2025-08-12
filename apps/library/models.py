@@ -37,12 +37,13 @@ class LoanHistory(models.Model):
         errors = {}
 
         # 日付チェック: loan_date <= due_date <= loan_date + 14日
-        if self.due_date < self.loan_date:
-            errors["due_date"] = "返却予定日は貸出日以降の日付を指定してください。"
-        elif self.due_date > self.loan_date + timedelta(days=14):
-            errors["due_date"] = (
-                "返却予定日は貸出日から14日以内の日付を指定してください。"
-            )
+        if self.due_date and self.loan_date:
+            if self.due_date < self.loan_date:
+                errors["due_date"] = "返却予定日は貸出日以降の日付を指定してください。"
+            elif self.due_date > self.loan_date + timedelta(days=14):
+                errors["due_date"] = (
+                    "返却予定日は貸出日から14日以内の日付を指定してください。"
+                )
 
         # 返却日がある場合のバリデーション
         if self.return_date:

@@ -1,6 +1,19 @@
-import pytest
+from datetime import timedelta
 
-from apps.library.forms import BookSearchForm
+import pytest
+from django.utils import timezone
+
+from apps.library.forms import BookSearchForm, LoanForm
+
+
+@pytest.fixture
+def today():
+    return timezone.now().date()
+
+
+@pytest.fixture
+def valid_due_date(today):
+    return today + timedelta(days=7)
 
 
 @pytest.mark.parametrize(
@@ -18,3 +31,30 @@ from apps.library.forms import BookSearchForm
 def test_book_search_form_validation(data, is_valid):
     form = BookSearchForm(data=data)
     assert form.is_valid() == is_valid
+
+
+@pytest.mark.django_db
+class TestLoanFormValidation:
+
+    def test_valid_loan_date(self, today, valid_due_date):
+        form = LoanForm(
+            data={
+                "loan_date": today,
+                "due_date": valid_due_date,
+            },
+            today=today,
+        )
+        assert form.is_valid()
+
+    def test_invalid_loan_date(self, today, valid_due_date):
+        wrong_day = today - timedelta(days=1)
+        form = LoanForm(
+            data={
+                "loan_date": wrong_day,
+                "due_date": valid_due_date,
+            },
+            today=today,
+        )
+        assert not form.is_valid()
+        assert "loan_date" in form.errors
+        assert "貸出日は今日以外にできません。" in form.errors["loan_date"]
