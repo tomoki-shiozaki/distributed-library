@@ -1,9 +1,11 @@
+import datetime
 from datetime import timedelta
 
 import pytest
+from django import forms
 from django.utils import timezone
 
-from apps.library.forms import BookSearchForm, LoanForm
+from apps.library.forms import BookSearchForm, LoanForm, ReservationForm
 
 
 @pytest.fixture
@@ -14,6 +16,14 @@ def today():
 @pytest.fixture
 def valid_due_date(today):
     return today + timedelta(days=7)
+
+
+@pytest.fixture
+def valid_reservation_data(today):
+    return {
+        "start_date": today + datetime.timedelta(days=1),
+        "end_date": today + datetime.timedelta(days=5),
+    }
 
 
 @pytest.mark.parametrize(
@@ -34,7 +44,20 @@ def test_book_search_form_validation(data, is_valid):
 
 
 @pytest.mark.django_db
-class TestLoanFormValidation:
+class TestLoanForm:
+
+    def test_form_has_required_fields(self, today):
+        form = LoanForm(today=today)
+        assert "loan_date" in form.fields
+        assert "due_date" in form.fields
+
+    def test_loan_date_is_hidden(self, today):
+        form = LoanForm(today=today)
+        assert isinstance(form.fields["loan_date"].widget, forms.HiddenInput)
+
+    def test_due_date_widget_is_date_input(self, today):
+        form = LoanForm(today=today)
+        assert form.fields["due_date"].widget.input_type == "date"
 
     def test_valid_loan_date(self, today, valid_due_date):
         form = LoanForm(
@@ -58,3 +81,24 @@ class TestLoanFormValidation:
         assert not form.is_valid()
         assert "loan_date" in form.errors
         assert "貸出日は今日以外にできません。" in form.errors["loan_date"]
+
+
+@pytest.mark.django_db
+class TestReservationForm:
+    def test_form_has_required_fields(self):
+        form = ReservationForm()
+        assert "start_date" in form.fields
+        assert "end_date" in form.fields
+
+    def test_widgets_are_date_inputs(self):
+        form = ReservationForm()
+        assert form.fields["start_date"].widget.input_type == "date"
+        assert form.fields["end_date"].widget.input_type == "date"
+
+    def test_help_texts_are_correct(self):
+        form = ReservationForm()
+        assert (
+            form.fields["start_date"].help_text
+            == "予約は本日以降の日付を指定してください。"
+        )
+        assert form.fields["end_date"].help_text == "予約期間は最長14日間です。"
