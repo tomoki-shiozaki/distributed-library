@@ -99,3 +99,61 @@ class TestBookSearchView:
         # フィルターがかからず両方表示される
         assert book1 in books
         assert book2 in books
+
+
+@pytest.fixture
+def book_with_copies(location):
+    book = Book.objects.create(
+        title="テスト本",
+        author="著者名",
+        publisher="出版社名",
+        isbn="1234567890123",
+        published_date=datetime.date(2024, 1, 1),
+    )
+    Copy.objects.create(book=book, location=location, status=Copy.Status.AVAILABLE)
+    Copy.objects.create(book=book, location=location, status=Copy.Status.LOANED)
+    Copy.objects.create(book=book, location=location, status=Copy.Status.DISCARDED)
+    return book
+
+
+@pytest.fixture
+def book_detail_url(book_with_copies):
+    return reverse("library:book_detail", args=[book_with_copies.pk])
+
+
+@pytest.mark.django_db
+class TestBookDetailView:
+
+    def test_book_detail_view_context(
+        self, client, book_detail_url, general, book_with_copies
+    ):
+        client.force_login(general)
+        response = client.get(book_detail_url)
+
+        assert response.status_code == 200
+
+        # 本の詳細
+        assert response.context["object"] == book_with_copies
+
+        # COPY_STATUS が含まれている
+        assert "COPY_STATUS" in response.context
+
+        # copies の内容を検証
+        copies = response.context["copies"]
+        statuses = [copy.status for copy in copies]
+
+        # 廃棄済みを除いたコピーの件数（book_with_copiesのコピーでDISCARDED以外の件数）
+        expected_count = (
+            Copy.objects.filter(book=book_with_copies)
+            .exclude(status=Copy.Status.DISCARDED)
+            .count()
+        )
+        assert len(copies) == expected_count, "copiesの件数が期待値と異なります"
+
+        # 廃棄されたコピーは含まれていない
+        assert Copy.Status.DISCARDED not in statuses
+
+        # 順番が AVAILABLE → LOANED になっているか
+        assert statuses == sorted(
+            statuses, key=lambda s: {Copy.Status.AVAILABLE: 1, Copy.Status.LOANED: 2}[s]
+        )
