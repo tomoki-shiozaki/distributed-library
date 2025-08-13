@@ -54,7 +54,7 @@ class BookSearchView(LoginRequiredMixin, IsGeneralMixin, ListView):
             loaned_count=Count("copies", filter=Q(copies__status=Copy.Status.LOANED)),
         )
 
-        return queryset
+        return queryset.order_by("pk")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
