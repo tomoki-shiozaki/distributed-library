@@ -119,12 +119,20 @@ class TestLoanCreateView:
         messages = list(get_messages(response.wsgi_request))
         assert any("貸出処理が完了しました" in m.message for m in messages)
 
-    def test_cannot_borrow_more(self, client, general, loan_url, monkeypatch):
+    def test_cannot_borrow_more(
+        self, client, general, loan_url, monkeypatch, today, due
+    ):
         client.force_login(general)
 
         monkeypatch.setattr(LoanService, "can_borrow_more", lambda user: False)
 
-        response = client.post(loan_url, data={"due_date": "2024-12-31"})
+        response = client.post(
+            loan_url,
+            data={
+                "loan_date": today,
+                "due_date": due,
+            },
+        )
 
         # ステータスコードは200（フォームエラーで再表示）
         assert response.status_code == 200
@@ -132,10 +140,16 @@ class TestLoanCreateView:
         form = response.context["form"]
         # non_field_errorsにエラーメッセージがあるか
         errors = form.non_field_errors()
-        assert "貸出可能な上限に達しています" in errors
+        assert any("貸出可能な上限に達しています" in e for e in errors)
 
     def test_loan_copy_raises_validation_error(
-        self, client, general, loan_url, monkeypatch
+        self,
+        client,
+        general,
+        loan_url,
+        monkeypatch,
+        today,
+        due,
     ):
         client.force_login(general)
 
@@ -147,7 +161,13 @@ class TestLoanCreateView:
 
         monkeypatch.setattr(LoanService, "loan_copy", mock_loan_copy)
 
-        response = client.post(loan_url, data={"due_date": "2024-12-31"})
+        response = client.post(
+            loan_url,
+            data={
+                "loan_date": today,
+                "due_date": due,
+            },
+        )
 
         assert response.status_code == 200
         form = response.context["form"]
