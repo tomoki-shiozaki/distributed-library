@@ -88,9 +88,15 @@ class TestLoanCreateView:
         # フォームの初期値に今日の日付が入っている
         assert form.initial["loan_date"] == today
 
-    def test_successful_loan(
-        self, client, general, loan_url, copy, monkeypatch, today, due
-    ):
+    def test_successful_loan(self, client, general, loan_url, monkeypatch, today, due):
+        """
+        貸出フォームに正しいデータをPOSTしたときに、処理が成功して
+        リダイレクトされ、成功メッセージが表示されることを確認する。
+
+        - loan_copy() はモックされているため、実処理は行われない。
+        - フォームのバリデーション（loan_date, due_date）は通る状態を前提とする。
+        - 異常系（バリデーションエラー・貸出上限超え等）は別テストで確認する。
+        """
         client.force_login(general)
 
         monkeypatch.setattr(LoanService, "can_borrow_more", lambda user: True)
