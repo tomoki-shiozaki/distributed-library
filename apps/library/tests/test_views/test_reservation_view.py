@@ -163,3 +163,20 @@ class TestReservationCreateView:
         form = response.context["form"]
         errors = form.non_field_errors()
         assert any("予約処理エラー" in e for e in errors)
+
+    def test_context_data_contains_expected_keys(
+        self, client, general, reservation_url, copy
+    ):
+        client.force_login(general)
+        response = client.get(reservation_url)
+
+        context = response.context
+
+        assert "book" in context
+        assert context["book"] == copy.book
+
+        assert "loan_periods" in context
+        assert hasattr(context["loan_periods"], "__iter__")
+
+        assert "reservation_periods" in context
+        assert hasattr(context["reservation_periods"], "__iter__")
