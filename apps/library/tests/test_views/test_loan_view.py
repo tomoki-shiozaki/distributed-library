@@ -1,10 +1,12 @@
 import datetime
+from datetime import timedelta
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.catalog.models import Book, Copy, StorageLocation
 from apps.library.services.loan_service import LoanService
@@ -45,6 +47,16 @@ def copy(location):
 
 
 @pytest.fixture
+def today():
+    return timezone.now().date()
+
+
+@pytest.fixture
+def due(today):
+    return today + timedelta(days=7)
+
+
+@pytest.fixture
 def loan_url(copy):
     return reverse("library:loan_create", kwargs={"copy_pk": copy.pk})
 
@@ -67,19 +79,18 @@ class TestLoanCreateView:
         response = client.get(loan_url)
         assert response.status_code == 200
 
-    def test_get_form_initial(self, client, general, loan_url):
+    def test_get_form_initial(self, client, general, loan_url, today):
         client.force_login(general)
         response = client.get(loan_url)
 
         assert response.status_code == 200
         form = response.context["form"]
         # フォームの初期値に今日の日付が入っている
-        from django.utils.timezone import now
-
-        today = now().date()
         assert form.initial["loan_date"] == today
 
-    def test_successful_loan(self, client, general, loan_url, copy, monkeypatch):
+    def test_successful_loan(
+        self, client, general, loan_url, copy, monkeypatch, today, due
+    ):
         client.force_login(general)
 
         monkeypatch.setattr(LoanService, "can_borrow_more", lambda user: True)
@@ -89,11 +100,13 @@ class TestLoanCreateView:
 
         monkeypatch.setattr(LoanService, "loan_copy", mock_loan_copy)
 
-        from django.utils.timezone import now
-
-        due_date_str = now().date().strftime("%Y-%m-%d")
-
-        response = client.post(loan_url, data={"due_date": due_date_str})
+        response = client.post(
+            loan_url,
+            data={
+                "loan_date": today,
+                "due_date": due,
+            },
+        )
 
         assert response.status_code == 302
 
