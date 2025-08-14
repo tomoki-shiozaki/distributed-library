@@ -173,3 +173,18 @@ class TestLoanCreateView:
         form = response.context["form"]
         errors = form.non_field_errors()
         assert "貸出処理エラー" in errors
+
+    def test_context_data_contains_expected_keys(self, client, general, loan_url, copy):
+        client.force_login(general)
+        response = client.get(loan_url)
+
+        context = response.context
+
+        assert "book" in context
+        assert context["book"] == copy.book
+
+        assert "loan_periods" in context
+        assert hasattr(context["loan_periods"], "__iter__")
+
+        assert "reservation_periods" in context
+        assert hasattr(context["reservation_periods"], "__iter__")
