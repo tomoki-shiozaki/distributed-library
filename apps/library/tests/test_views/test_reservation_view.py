@@ -47,7 +47,7 @@ def copy(location):
 
 @pytest.fixture
 def today():
-    return timezone.now().date()
+    return timezone.localdate()
 
 
 @pytest.fixture

@@ -85,7 +85,7 @@ def loaned_copy_factory(copy_factory):
 
 @pytest.fixture
 def today():
-    return timezone.now().date()
+    return timezone.localdate()
 
 
 @pytest.mark.django_db(transaction=True)

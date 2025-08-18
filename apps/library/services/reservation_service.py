@@ -92,7 +92,7 @@ class ReservationService:
         if reservation.status != ReservationHistory.Status.RESERVED:
             raise ValidationError("予約中のものしか貸出にできません。")
 
-        loan_date = loan_date or timezone.now().date()
+        loan_date = loan_date or timezone.localdate()
         if loan_date < reservation.start_date:
             raise ValidationError("貸出日は予約開始日より前にはできません。")
         if loan_date > reservation.end_date:

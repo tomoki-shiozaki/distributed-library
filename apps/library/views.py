@@ -92,7 +92,7 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         self.copy = get_object_or_404(Copy, pk=kwargs["copy_pk"])
-        self.today = timezone.now().date()
+        self.today = timezone.localdate()
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
