@@ -94,6 +94,13 @@ def reservation_cancel_url(reservation_history):
     )
 
 
+@pytest.fixture
+def reservation_loan_url(reservation_history):
+    return reverse(
+        "user_libraries:reservation_loan", kwargs={"pk": reservation_history.pk}
+    )
+
+
 @pytest.mark.django_db
 class TestReservationCancelView:
 
@@ -151,4 +158,67 @@ class TestReservationCancelView:
         client.force_login(general)
 
         response = client.post(reservation_cancel_url)
+        assert response.status_code == 404
+
+
+@pytest.mark.django_db
+class TestReservationLoanView:
+
+    def test_successful_loan_conversion(
+        self, client, general, reservation_history, my_library_url, reservation_loan_url
+    ):
+        client.force_login(general)
+
+        with patch(
+            "apps.library.services.reservation_service.ReservationService.convert_to_loan"
+        ) as mock_convert:
+            mock_convert.return_value = "mocked_loan_object"  # 任意の戻り値
+
+            response = client.post(reservation_loan_url)
+
+            mock_convert.assert_called_once_with(reservation_history)
+
+        assert response.status_code == 302
+        assert response.url == my_library_url
+
+        messages = list(get_messages(response.wsgi_request))
+        assert any("予約から貸出への変更が完了しました。" in str(m) for m in messages)
+
+    def test_loan_conversion_validation_error(
+        self, client, general, my_library_url, reservation_loan_url
+    ):
+        client.force_login(general)
+
+        with patch(
+            "apps.library.services.reservation_service.ReservationService.convert_to_loan",
+            side_effect=ValidationError("変換できません"),
+        ):
+            response = client.post(reservation_loan_url)
+
+        assert response.status_code == 302
+        assert response.url == my_library_url
+
+        messages = list(get_messages(response.wsgi_request))
+        assert any("変換できません" in str(m) for m in messages)
+
+    def test_other_users_cannot_convert_reservation_to_loan(
+        self,
+        client,
+        general,
+        reservation_history,
+        django_user_model,
+        reservation_loan_url,
+    ):
+        # 別ユーザーを作成して予約のユーザーにセット
+        another_user = django_user_model.objects.create_user(
+            username="other", password="pass"
+        )
+        reservation_history.user = another_user
+        reservation_history.save()
+
+        # テスト対象のユーザーでログイン
+        client.force_login(general)
+
+        response = client.post(reservation_loan_url)
+
         assert response.status_code == 404
