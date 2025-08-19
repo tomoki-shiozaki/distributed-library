@@ -53,21 +53,24 @@ def due(today):
 
 
 @pytest.fixture
-def loan_history(general, copy, db):
+def loan_history(db, general, copy, today, due):
     return LoanHistory.objects.create(
-        user=general, copy=copy, status=LoanHistory.Status.ON_LOAN
+        user=general,
+        copy=copy,
+        loan_date=today,
+        due_date=due,
+        status=LoanHistory.Status.ON_LOAN,
     )
 
 
 @pytest.fixture
-def reservation_history(general, copy, db):
-    today = timezone.localdate()
+def reservation_history(db, general, copy, today):
     return ReservationHistory.objects.create(
         user=general,
         copy=copy,
         status=ReservationHistory.Status.RESERVED,
-        start_date=today - timezone.timedelta(days=1),
-        end_date=today + timezone.timedelta(days=1),
+        start_date=today,
+        end_date=today + timedelta(days=1),
     )
 
 
@@ -85,66 +88,66 @@ class TestMyLibraryView:
         assert response.status_code == 200
         assert "user_libraries/my_library.html" in [t.name for t in response.templates]
 
-    # def test_loan_history_in_context(
-    #     self, client, general, loan_history, my_library_url
-    # ):
-    #     # LoanHistoryがコンテキストに含まれていることを確認
-    #     client.force_login(general)
-    #     response = client.get(my_library_url)
+    def test_loan_history_in_context(
+        self, client, general, loan_history, my_library_url
+    ):
+        client.force_login(general)
+        response = client.get(my_library_url)
 
-    #     context = response.context
-    #     assert "loans" in context
-    #     assert len(context["loans"]) == 1
-    #     assert context["loans"][0] == loan_history
+        context = response.context
+        assert "loans" in context
+        assert len(context["loans"]) == 1
+        assert context["loans"][0] == loan_history
 
-    # def test_reservation_history_in_context(
-    #     self, client, general, reservation_history, my_library_url
-    # ):
-    #     # ReservationHistoryがコンテキストに含まれていることを確認
-    #     client.force_login(general)
-    #     response = client.get(my_library_url)
+    def test_reservation_history_in_context(
+        self, client, general, reservation_history, my_library_url
+    ):
+        client.force_login(general)
+        response = client.get(my_library_url)
 
-    #     context = response.context
-    #     assert "reservations" in context
-    #     assert len(context["reservations"]) == 1
-    #     assert context["reservations"][0] == reservation_history
+        context = response.context
+        assert "reservations" in context
+        assert len(context["reservations"]) == 1
+        assert context["reservations"][0] == reservation_history
 
-    #     # 'can_loan_now' が正しく設定されていることを確認
-    #     assert context["reservations"][0].can_loan_now is True
+        # 'can_loan_now' が正しく設定されていることを確認
+        assert context["reservations"][0].can_loan_now is True
 
-    # def test_reservation_can_loan_now_false(
-    #     self, client, general, reservation_history, my_library_url
-    # ):
-    #     # 予約の期間が終了している場合 'can_loan_now' が False であることを確認
-    #     today = timezone.localdate()
-    #     reservation_history.start_date = today - timezone.timedelta(days=1)
-    #     reservation_history.end_date = today - timezone.timedelta(days=1)
-    #     reservation_history.save()
+    def test_reservation_can_loan_now_false(
+        self, client, general, today, reservation_history, my_library_url
+    ):
+        # 予約の期間が終了している場合 'can_loan_now' が False であることを確認
+        reservation_history.start_date = today - timedelta(days=1)
+        reservation_history.end_date = today - timedelta(days=1)
+        reservation_history.full_clean = (
+            lambda *args, **kwargs: None
+        )  # バリデーションスキップ
+        reservation_history.save()
 
-    #     client.force_login(general)
-    #     response = client.get(my_library_url)
+        client.force_login(general)
+        response = client.get(my_library_url)
 
-    #     context = response.context
-    #     assert context["reservations"][0].can_loan_now is False
+        context = response.context
+        assert context["reservations"][0].can_loan_now is False
 
-    # def test_reservation_no_available_copy(
-    #     self, client, general, reservation_history, copy, my_library_url
-    # ):
-    #     # コピーが貸出中の場合 'can_loan_now' が False であることを確認
-    #     copy.status = Copy.Status.ON_LOAN  # コピーを貸出中に設定
-    #     copy.save()
+    def test_reservation_no_available_copy(
+        self, client, general, reservation_history, copy, my_library_url
+    ):
+        # コピーが貸出中の場合 'can_loan_now' が False であることを確認
+        copy.status = Copy.Status.LOANED  # コピーを貸出中に設定
+        copy.save()
 
-    #     client.force_login(general)
-    #     response = client.get(my_library_url)
+        client.force_login(general)
+        response = client.get(my_library_url)
 
-    #     context = response.context
-    #     assert context["reservations"][0].can_loan_now is False
+        context = response.context
+        assert context["reservations"][0].can_loan_now is False
 
-    # def test_no_loans_or_reservations(self, client, general, my_library_url):
-    #     # ユーザーに貸出履歴や予約履歴がない場合
-    #     client.force_login(general)
-    #     response = client.get(my_library_url)
+    def test_no_loans_or_reservations(self, client, general, my_library_url):
+        # ユーザーに貸出履歴や予約履歴がない場合
+        client.force_login(general)
+        response = client.get(my_library_url)
 
-    #     context = response.context
-    #     assert len(context.get("loans", [])) == 0
-    #     assert len(context.get("reservations", [])) == 0
+        context = response.context
+        assert len(context.get("loans", [])) == 0
+        assert len(context.get("reservations", [])) == 0
