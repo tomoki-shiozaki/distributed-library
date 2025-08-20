@@ -1,0 +1,30 @@
+# 仮想環境ディレクトリ
+.venv/
+
+# 環境変数ファイル
+.env
+
+# Python キャッシュファイル
+__pycache__/
+*.pyc
+*.pyo
+
+# Git ディレクトリ
+.git/
+.gitignore
+
+# IDE 設定ファイル
+.vscode/
+
+# pytest キャッシュディレクトリ
+.pytest_cache/
+
+# SQLite データベースファイル
+db.sqlite3
+
+# テストカバレッジ関連
+.coverage
+htmlcov/
+
+# メモ
+memo/

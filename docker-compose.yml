@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+      - ./data/db.sqlite3:/code/db.sqlite3 # SQLite DBを永続化する
+    env_file:
+      - .env.docker # .envファイルを参照
