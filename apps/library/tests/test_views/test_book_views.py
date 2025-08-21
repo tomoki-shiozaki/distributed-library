@@ -77,6 +77,43 @@ class TestBookSearchView:
         assert book.available_count == 1
         assert book.loaned_count == 1
 
+    def test_filter_by_author(
+        self, client, general, books_with_copies, book_search_url
+    ):
+        client.force_login(general)
+        response = client.get(book_search_url, {"author": "田中"})
+
+        assert response.status_code == 200
+        books = response.context["books"]
+        book1, book2 = books_with_copies
+
+        assert book1 in books
+        assert book2 not in books
+
+    def test_filter_by_publisher(
+        self, client, general, books_with_copies, book_search_url
+    ):
+        client.force_login(general)
+        response = client.get(book_search_url, {"publisher": "出版社A"})
+
+        assert response.status_code == 200
+        books = response.context["books"]
+        book1, book2 = books_with_copies
+
+        assert book1 in books
+        assert book2 not in books
+
+    def test_filter_by_isbn(self, client, general, books_with_copies, book_search_url):
+        client.force_login(general)
+        response = client.get(book_search_url, {"isbn": "1111111111111"})
+
+        assert response.status_code == 200
+        books = response.context["books"]
+        book1, book2 = books_with_copies
+
+        assert book1 in books
+        assert book2 not in books
+
     def test_get_context_data_contains_form(self, client, general, book_search_url):
         client.force_login(general)
         response = client.get(book_search_url, {"title": "Python"})
