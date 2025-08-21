@@ -58,6 +58,17 @@ def due(today):
 @pytest.mark.django_db
 class TestLoanHistory:
 
+    def test_str_method_returns_expected_format(self, general, copy, today, due):
+        loan = LoanHistory.objects.create(
+            user=general,
+            copy=copy,
+            loan_date=today,
+            due_date=due,
+            status=LoanHistory.Status.ON_LOAN,
+        )
+        expected = f"{general} - {copy} ({LoanHistory.Status.ON_LOAN})"
+        assert str(loan) == expected
+
     def test_clean_valid_dates(self, general, copy, today):
         loan = LoanHistory(
             user=general,

@@ -35,6 +35,17 @@ class TestBookModel(TestCase):
         book = self.book
         self.assertEqual(str(book), "hogehoge（第1版）")
 
+    def test_str_representation_without_edition(self):
+        book = Book.objects.create(
+            isbn="1234567890999",
+            title="No Edition Title",
+            author="Author",
+            published_date=datetime.date(2025, 1, 1),
+            published_date_precision=Book.PublishedDatePrecision.DAY,
+            edition=None,
+        )
+        self.assertEqual(str(book), "No Edition Title")
+
     def test_clean_raises_error_if_date_is_none_but_precision_is_not_unknown(self):
         book = Book(
             isbn="9876543210123",
