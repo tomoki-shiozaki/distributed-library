@@ -15,9 +15,6 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 # ソースコードをコピー
 COPY . .
 
-# 静的ファイル収集（Djangoのcollectstatic）
-RUN python manage.py collectstatic --noinput
-
 # --- Final stage ---
 FROM python:3.13-slim-bookworm
 
