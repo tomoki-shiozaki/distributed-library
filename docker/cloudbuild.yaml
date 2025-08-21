@@ -6,8 +6,8 @@ steps:
         "-t",
         "gcr.io/$PROJECT_ID/distributed-library-image",
         "-f",
-        "docker/Dockerfile.dev",
-        "docker/",
+        "docker/Dockerfile.prod",
+        "..",
       ]
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/$PROJECT_ID/distributed-library-image"]
