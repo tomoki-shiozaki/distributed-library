@@ -59,11 +59,11 @@ class TestISBNCheckView(TestCase):
     def test_redirect_to_book_create_from_isbn_if_book_does_not_exist(self):
         self.client.login(username="lib", password="pass")
         response = self.client.post(
-            reverse("catalog:isbn_check"), data={"isbn": "9999999"}
+            reverse("catalog:isbn_check"), data={"isbn": "9999999999999"}
         )
         self.assertRedirects(
             response,
-            reverse("catalog:book_create_from_isbn", kwargs={"isbn": "9999999"}),
+            reverse("catalog:book_create_from_isbn", kwargs={"isbn": "9999999999999"}),
         )
 
 

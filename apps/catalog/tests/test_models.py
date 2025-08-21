@@ -1,7 +1,7 @@
 import datetime
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
-from django.utils import timezone
 
 from apps.catalog.models import Book, Copy, StorageLocation
 
@@ -34,6 +34,47 @@ class TestBookModel(TestCase):
     def test_str_representation(self):
         book = self.book
         self.assertEqual(str(book), "hogehoge（第1版）")
+
+    def test_str_representation_without_edition(self):
+        book = Book.objects.create(
+            isbn="1234567890999",
+            title="No Edition Title",
+            author="Author",
+            published_date=datetime.date(2025, 1, 1),
+            published_date_precision=Book.PublishedDatePrecision.DAY,
+            edition=None,
+        )
+        self.assertEqual(str(book), "No Edition Title")
+
+    def test_clean_raises_error_if_date_is_none_but_precision_is_not_unknown(self):
+        book = Book(
+            isbn="9876543210123",
+            title="Invalid Book",
+            author="Test Author",
+            published_date=None,
+            published_date_precision=Book.PublishedDatePrecision.DAY,
+        )
+        with self.assertRaises(ValidationError) as context:
+            book.clean()
+        self.assertIn(
+            "出版日が未入力の場合、精度は「不明」に設定してください。",
+            str(context.exception),
+        )
+
+    def test_clean_raises_error_if_date_is_set_but_precision_is_unknown(self):
+        book = Book(
+            isbn="9876543210124",
+            title="Invalid Book 2",
+            author="Test Author",
+            published_date=datetime.date(2025, 1, 1),
+            published_date_precision=Book.PublishedDatePrecision.UNKNOWN,
+        )
+        with self.assertRaises(ValidationError) as context:
+            book.clean()
+        self.assertIn(
+            "出版日が入力されている場合は、精度を「不明」以外のいずれかに選択してください。",
+            str(context.exception),
+        )
 
 
 class TestStorageLocationModel(TestCase):
@@ -72,6 +113,11 @@ class TestCopyModel(TestCase):
         self.assertEqual(copy._meta.verbose_name_plural, "蔵書")
         self.assertIsNotNone(copy.registered_date)
         self.assertEqual(copy.registered_date, datetime.date.today())
+
+        expected_str = (
+            f"{copy.book} - {copy.location.name} - {copy.get_status_display()}"
+        )
+        self.assertEqual(str(copy), expected_str)
 
     def test_status_choices(self):
         valid_statuses = dict(Copy.Status.choices)

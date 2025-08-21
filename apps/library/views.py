@@ -12,7 +12,8 @@ from apps.catalog.models import Book, Copy
 from apps.core.mixins import IsGeneralMixin
 from apps.library.forms import BookSearchForm, LoanForm, ReservationForm
 from apps.library.models import LoanHistory, ReservationHistory
-from apps.library.services import LoanService, ReservationService
+from apps.library.services.loan_service import LoanService
+from apps.library.services.reservation_service import ReservationService
 
 
 # Create your views here.
@@ -53,7 +54,7 @@ class BookSearchView(LoginRequiredMixin, IsGeneralMixin, ListView):
             loaned_count=Count("copies", filter=Q(copies__status=Copy.Status.LOANED)),
         )
 
-        return queryset
+        return queryset.order_by("pk")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -91,7 +92,7 @@ class LoanCreateView(LoginRequiredMixin, IsGeneralMixin, CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         self.copy = get_object_or_404(Copy, pk=kwargs["copy_pk"])
-        self.today = timezone.now().date()
+        self.today = timezone.localdate()
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):

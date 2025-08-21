@@ -147,3 +147,4 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # --- Project specific settings ---
 MAX_LOAN_COUNT = 10
 MAX_RESERVATION_COUNT = 7
+FORMS_URLFIELD_ASSUME_HTTPS = True

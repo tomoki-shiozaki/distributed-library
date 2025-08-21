@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from apps.catalog.models import Book, Copy, StorageLocation
 from apps.library.models import LoanHistory, ReservationHistory
-from apps.library.services import LoanService
+from apps.library.services.loan_service import LoanService
 
 User = get_user_model()
 LIBRARIAN = User.UserRole.LIBRARIAN
@@ -47,8 +47,21 @@ def copy(db, book, location):
 
 
 @pytest.fixture
+def copy_factory(db, book, location):
+    def create_copy(**kwargs):
+        return Copy.objects.create(
+            book=book,
+            location=location,
+            status=Copy.Status.AVAILABLE,
+            **kwargs,
+        )
+
+    return create_copy
+
+
+@pytest.fixture
 def today():
-    return timezone.now().date()
+    return timezone.localdate()
 
 
 @pytest.fixture
@@ -80,6 +93,40 @@ class TestLoanService:
         assert loan.status == LoanHistory.Status.ON_LOAN
         copy.refresh_from_db()
         assert copy.status == Copy.Status.LOANED
+
+    def test_loan_copy_succeeds_when_reservation_period_does_not_overlap(
+        self, general, copy, today, due
+    ):
+        # 他人の予約が期間外
+        other_user = User.objects.create_user(username="otheruser")
+        ReservationHistory.objects.create(
+            user=other_user,
+            copy=copy,
+            start_date=due + timedelta(days=1),  # 貸出期間の後
+            end_date=due + timedelta(days=10),
+            status=ReservationHistory.Status.RESERVED,
+        )
+        loan = LoanService.loan_copy(
+            user=general, copy=copy, loan_date=today, due_date=due
+        )
+        assert loan.status == LoanHistory.Status.ON_LOAN
+
+    def test_loan_copy_fails_when_user_reaches_max_loans(
+        self, general, copy_factory, today, due, settings
+    ):
+        settings.MAX_LOAN_COUNT = 1
+        # すでに1冊借りている
+        LoanHistory.objects.create(
+            user=general,
+            copy=copy_factory(),
+            loan_date=today,
+            due_date=due,
+            status=LoanHistory.Status.ON_LOAN,
+        )
+        with pytest.raises(ValidationError, match="貸出可能な上限に達しています"):
+            LoanService.loan_copy(
+                user=general, copy=copy_factory(), loan_date=today, due_date=due
+            )
 
     def test_loan_copy_fails_when_copy_already_loaned(self, general, copy, today, due):
         copy.status = Copy.Status.LOANED

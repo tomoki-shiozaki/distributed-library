@@ -37,18 +37,19 @@ class LoanHistory(models.Model):
         errors = {}
 
         # 日付チェック: loan_date <= due_date <= loan_date + 14日
-        if self.due_date < self.loan_date:
-            errors["due_date"] = "返却予定日は貸出日以降の日付を指定してください。"
-        elif self.due_date > self.loan_date + timedelta(days=14):
-            errors["due_date"] = (
-                "返却予定日は貸出日から14日以内の日付を指定してください。"
-            )
+        if self.due_date and self.loan_date:
+            if self.due_date < self.loan_date:
+                errors["due_date"] = "返却予定日は貸出日以降の日付を指定してください。"
+            elif self.due_date > self.loan_date + timedelta(days=14):
+                errors["due_date"] = (
+                    "返却予定日は貸出日から14日以内の日付を指定してください。"
+                )
 
         # 返却日がある場合のバリデーション
         if self.return_date:
             if self.return_date < self.loan_date:
                 errors["return_date"] = "返却日は貸出日以降の日付を指定してください。"
-            elif self.return_date > timezone.now().date():
+            elif self.return_date > timezone.localdate():
                 errors["return_date"] = "返却日は今日以前の日付を指定してください。"
 
         if errors:
@@ -65,7 +66,7 @@ class LoanHistory(models.Model):
         - ステータスを「返却済み」に変更
         - 関連する Copy を AVAILABLE に更新
         """
-        self.return_date = return_date or timezone.now().date()
+        self.return_date = return_date or timezone.localdate()
         self.status = self.Status.RETURNED
         self.save()
 
@@ -109,7 +110,7 @@ class ReservationHistory(models.Model):
 
         # 予約中の場合のみ日付チェックを厳格に行う
         if self.status == self.Status.RESERVED:
-            today = timezone.now().date()
+            today = timezone.localdate()
             max_start_date = today + timedelta(days=90)
 
             if self.start_date < today:

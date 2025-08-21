@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 from apps.catalog.models import Copy
 from apps.core.mixins import IsGeneralMixin
 from apps.library.models import LoanHistory, ReservationHistory
-from apps.library.services import ReservationService
+from apps.library.services.reservation_service import ReservationService
 
 
 # Create your views here.
