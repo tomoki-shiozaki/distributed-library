@@ -1,7 +1,7 @@
 import datetime
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
-from django.utils import timezone
 
 from apps.catalog.models import Book, Copy, StorageLocation
 
@@ -34,6 +34,36 @@ class TestBookModel(TestCase):
     def test_str_representation(self):
         book = self.book
         self.assertEqual(str(book), "hogehoge（第1版）")
+
+    def test_clean_raises_error_if_date_is_none_but_precision_is_not_unknown(self):
+        book = Book(
+            isbn="9876543210123",
+            title="Invalid Book",
+            author="Test Author",
+            published_date=None,
+            published_date_precision=Book.PublishedDatePrecision.DAY,
+        )
+        with self.assertRaises(ValidationError) as context:
+            book.clean()
+        self.assertIn(
+            "出版日が未入力の場合、精度は「不明」に設定してください。",
+            str(context.exception),
+        )
+
+    def test_clean_raises_error_if_date_is_set_but_precision_is_unknown(self):
+        book = Book(
+            isbn="9876543210124",
+            title="Invalid Book 2",
+            author="Test Author",
+            published_date=datetime.date(2025, 1, 1),
+            published_date_precision=Book.PublishedDatePrecision.UNKNOWN,
+        )
+        with self.assertRaises(ValidationError) as context:
+            book.clean()
+        self.assertIn(
+            "出版日が入力されている場合は、精度を「不明」以外のいずれかに選択してください。",
+            str(context.exception),
+        )
 
 
 class TestStorageLocationModel(TestCase):
