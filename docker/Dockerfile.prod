@@ -1,0 +1,35 @@
+# --- Build stage ---
+FROM python:3.13-slim-bookworm AS builder
+
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# 依存関係のコピーとインストール
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+
+# ソースコードをコピー
+COPY . .
+
+# 静的ファイル収集（Djangoのcollectstatic）
+RUN python manage.py collectstatic --noinput
+
+# --- Final stage ---
+FROM python:3.13-slim-bookworm
+
+WORKDIR /app
+
+# ビルドステージから依存関係と静的ファイルをコピー
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=builder /app /app
+
+# ポート番号の環境変数
+ENV PORT=8080
+
+COPY docker/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
