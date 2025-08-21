@@ -1,5 +1,7 @@
 set -e
 
+export DJANGO_SETTINGS_MODULE=django_project.settings
+
 # マイグレーション（失敗時はコンテナ停止）
 echo "Running migrations..."
 python manage.py migrate --noinput
