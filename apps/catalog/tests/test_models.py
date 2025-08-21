@@ -103,6 +103,11 @@ class TestCopyModel(TestCase):
         self.assertIsNotNone(copy.registered_date)
         self.assertEqual(copy.registered_date, datetime.date.today())
 
+        expected_str = (
+            f"{copy.book} - {copy.location.name} - {copy.get_status_display()}"
+        )
+        self.assertEqual(str(copy), expected_str)
+
     def test_status_choices(self):
         valid_statuses = dict(Copy.Status.choices)
         for key in [Copy.Status.AVAILABLE, Copy.Status.LOANED, Copy.Status.DISCARDED]:
