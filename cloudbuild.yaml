@@ -34,7 +34,7 @@ steps:
         "--region",
         "asia-northeast1",
         "--allow-unauthenticated",
-        "--set-secrets",
+        "--set-env-vars",
         "SECRET_KEY=projects/$PROJECT_ID/secrets/SECRET_KEY_DISTRIBUTED_LIBRARY/versions/latest",
         "ALLOWED_HOSTS=projects/$PROJECT_ID/secrets/ALLOWED_HOSTS_DISTRIBUTED_LIBRARY/versions/latest",
         "DATABASE_URL=projects/$PROJECT_ID/secrets/DATABASE_URL_DISTRIBUTED_LIBRARY/versions/latest",
