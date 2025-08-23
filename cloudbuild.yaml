@@ -5,7 +5,7 @@ steps:
       [
         "build",
         "-t",
-        "gcr.io/$PROJECT_ID/distributed-library-image",
+        "asia-northeast1-docker.pkg.dev/$PROJECT_ID/distributed-library-repo/distributed-library-image",
         "-f",
         "docker/Dockerfile.prod",
         ".",
@@ -28,7 +28,7 @@ steps:
         "deploy",
         "distributed-library",
         "--image",
-        "gcr.io/$PROJECT_ID/distributed-library-image",
+        "asia-northeast1-docker.pkg.dev/$PROJECT_ID/distributed-library-repo/distributed-library-image",
         "--platform",
         "managed",
         "--region",
