@@ -21,7 +21,6 @@ steps:
 
   # ステップ 3: Cloud Runにデプロイ
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    entrypoint: gcloud
     args:
       [
         "run",
@@ -34,10 +33,10 @@ steps:
         "--region",
         "asia-northeast1",
         "--allow-unauthenticated",
-        "--set-env-vars",
-        "SECRET_KEY=$(gcloud secrets versions access latest --secret=SECRET_KEY_DISTRIBUTED_LIBRARY)",
-        "ALLOWED_HOSTS=$(gcloud secrets versions access latest --secret=ALLOWED_HOSTS_DISTRIBUTED_LIBRARY)",
-        "DATABASE_URL=$(gcloud secrets versions access latest --secret=DATABASE_URL_DISTRIBUTED_LIBRARY)",
+        "--set-secrets",
+        "SECRET_KEY=projects/$PROJECT_ID/secrets/SECRET_KEY_DISTRIBUTED_LIBRARY/versions/latest",
+        "ALLOWED_HOSTS=projects/$PROJECT_ID/secrets/ALLOWED_HOSTS_DISTRIBUTED_LIBRARY/versions/latest",
+        "DATABASE_URL=projects/$PROJECT_ID/secrets/DATABASE_URL_DISTRIBUTED_LIBRARY/versions/latest",
       ]
 
 # オプション: ロギング設定
