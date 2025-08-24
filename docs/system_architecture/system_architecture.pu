@@ -1,0 +1,36 @@
+@startuml system_architecture
+skinparam defaultFontName "Noto Sans CJK JP"
+left to right direction
+
+
+actor User
+actor Developer
+
+package "GitHub" {
+  component "GitHub Repository" as GitHubRepo
+}
+
+package "Google Cloud" {
+  component "Cloud Build" as CloudBuild
+  component "Artifact Registry" as ArtifactRegistry
+  component "Cloud Run" as CloudRun
+  component "Cloud Logging" as Logging
+}
+
+package "Neon" {
+  component "Neon PostgreSQL" as NeonPostgreSQL
+}
+
+' 開発からデプロイ
+Developer --> GitHubRepo : Push Code
+GitHubRepo --> CloudBuild : Trigger CI/CD
+CloudBuild --> ArtifactRegistry : Push Container Image
+CloudBuild --> CloudRun : Deploy Image
+ArtifactRegistry --> CloudRun : Pull Image
+
+' アプリ実行
+User --> CloudRun : HTTP Request
+CloudRun --> NeonPostgreSQL : DB Access
+CloudRun ..> Logging : Send Logs
+
+@enduml

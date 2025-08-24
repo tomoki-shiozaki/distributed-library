@@ -1,0 +1,46 @@
+steps:
+  # ステップ 1: Dockerイメージのビルド
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "asia-northeast1-docker.pkg.dev/$PROJECT_ID/distributed-library-repo/distributed-library-image",
+        "-f",
+        "docker/Dockerfile.prod",
+        ".",
+      ]
+
+  # ステップ 2: Docker イメージを Artifact Registry にプッシュ
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "asia-northeast1-docker.pkg.dev/$PROJECT_ID/distributed-library-repo/distributed-library-image",
+      ]
+
+  # ステップ 3: Cloud Runにデプロイ
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    args:
+      [
+        "gcloud",
+        "run",
+        "deploy",
+        "distributed-library",
+        "--image",
+        "asia-northeast1-docker.pkg.dev/$PROJECT_ID/distributed-library-repo/distributed-library-image",
+        "--platform",
+        "managed",
+        "--region",
+        "asia-northeast1",
+        "--allow-unauthenticated",
+        "--set-secrets",
+        "SECRET_KEY=SECRET_KEY_DISTRIBUTED_LIBRARY:latest,ALLOWED_HOSTS=ALLOWED_HOSTS_DISTRIBUTED_LIBRARY:latest,DATABASE_URL=DATABASE_URL_DISTRIBUTED_LIBRARY:latest,CSRF_TRUSTED_ORIGINS=CSRF_TRUSTED_ORIGINS_DISTRIBUTED_LIBRARY:latest",
+      ]
+
+# オプション: ロギング設定
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+# タイムアウト設定
+timeout: 600s

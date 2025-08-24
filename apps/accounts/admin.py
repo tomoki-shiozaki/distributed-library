@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .forms import CustomUserCreationForm, CustomUserChangeForm
+from .forms import CustomUserChangeForm, CustomUserCreationForm
 from .models import CustomUser
 
 
@@ -11,16 +11,30 @@ class CustomUserAdmin(UserAdmin):
     form = CustomUserChangeForm
     model = CustomUser
     list_display = [
-        "email",
         "username",
+        "email",
         "role",
+        "is_active",
         "is_staff",
     ]
-    fieldsets = UserAdmin.fieldsets + (("カスタムフィールド", {"fields": ("role",)}),)
+    fieldsets = UserAdmin.fieldsets + (("追加情報", {"fields": ("role",)}),)
 
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ("カスタムフィールド", {"fields": ("role",)}),
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "username",
+                    "email",
+                    "role",
+                    "password1",
+                    "password2",
+                ),
+            },
+        ),
     )
+    list_filter = ("role", "is_active", "is_staff")
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
