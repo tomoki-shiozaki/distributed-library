@@ -6,3 +6,4 @@ memo/
 .vscode/
 .coverage
 htmlcov/
+staticfiles/

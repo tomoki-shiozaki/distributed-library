@@ -28,3 +28,6 @@ htmlcov/
 
 # メモ
 memo/
+
+# 空の staticfiles ディレクトリ（開発時の警告回避用）
+staticfiles/
