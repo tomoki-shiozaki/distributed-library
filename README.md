@@ -75,11 +75,26 @@
 
 ## 必要な環境・依存関係
 
-- **Python バージョン**: 3.12（動作確認済み）
-- **依存ライブラリ**:
-  - Django 5.2
+- **Python バージョン**:
+
+  - 開発環境（venv）: Python 3.12（動作確認済み）
+  - Docker 実行環境: Python 3.13（ベースイメージ：`python:3.13-slim-bookworm`）
+
+- **主な依存ライブラリ**（詳細は `requirements.txt` を参照）:
+  - Django（バージョン 5.2）
+  - **テスト関連ライブラリ**:
+    - pytest 8.4.1
+    - pytest-django 4.11.1
 
 ## セットアップ手順
+
+本プロジェクトは、以下の 2 通りの方法で開発環境を構築できます：
+
+- Python の仮想環境（venv）を使う方法
+
+- Docker / Docker Compose を使う方法（本番と近い環境での動作確認にも適しています）
+
+### 1. Python 仮想環境（venv）を使ったセットアップ
 
 ```bash
 # Pythonの仮想環境を作成します（初回のみ）
@@ -93,4 +108,79 @@ python manage.py migrate
 # ローカルサーバーを起動します。
 python manage.py runserver
 # その後、ブラウザで`http://127.0.0.1:8000/`にアクセスしてください。
+```
+
+### 2. Docker を使ったセットアップ（開発確認用）
+
+> ※ docker-compose.yml および docker/Dockerfile.dev を使用しています。
+
+```bash
+# 初回ビルドとコンテナ起動
+docker compose up --build
+
+# 2回目以降（ビルド不要な場合）
+docker compose up
+```
+
+> ※ コンテナ起動直後は、マイグレーションが未実行のためデータベースの機能が正しく動作しません。  
+> 必ず `python manage.py migrate` を実行してください。
+
+- 初回マイグレーション
+
+```bash
+# 別ターミナルでコンテナに接続
+docker compose exec web bash
+
+# マイグレーションを実行
+python manage.py migrate
+```
+
+### 環境変数設定 (.env ファイル)
+
+本プロジェクトでは `environs` を使って環境変数を読み込みます。  
+以下の内容を `.env` ファイルとしてプロジェクトルートに用意してください。
+
+```env
+# Djangoのシークレットキー（必須）
+SECRET_KEY=your-secret-key
+
+# 開発中は True、本番は False
+DEBUG=True
+
+# SQLite を使う場合のデータベースURL
+DATABASE_URL=sqlite:///db.sqlite3
+```
+
+> ※ 本番運用する場合は ALLOWED_HOSTS や 必要に応じて CSRF_TRUSTED_ORIGINS などの設定も追加してください。
+
+## テスト
+
+本プロジェクトでは、主に以下のテストツールを使用しています：
+
+- **pytest**: ユニットテスト・統合テストの実行に使用
+- **pytest-django**: Django 向けの拡張
+- **unittest**: 一部のテストケースに使用
+- **coverage.py**: テストカバレッジの測定に使用（オプション）
+
+### テストの実行方法
+
+#### ローカル（venv）での実行
+
+```bash
+pytest
+```
+
+#### Docker コンテナ上での実行
+
+```bash
+docker compose exec web pytest
+```
+
+### テストカバレッジ
+
+`coverage` を用いたテストカバレッジは現在 **約 99%** を達成しています。
+
+```bash
+coverage run -m pytest
+coverage report
 ```
