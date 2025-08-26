@@ -64,6 +64,15 @@
   | 司書           | librarian1 | dev_librarian1_123! |
 
   > ※これらのアカウントはテスト用です。本番環境の重要な情報は含まれていません。
+  > 動作確認にはこれらのテストアカウントをご利用ください。
+
+## システム構成図（Cloud Run デプロイ構成）
+
+本プロジェクトは主要な本番環境として Google Cloud の Cloud Run を用いており、サーバーレス環境での運用を行っています。 以下に、Cloud Run 環境へのデプロイを含むシステム全体の構成図を示します。
+
+![システム構成図](docs/system_architecture/system_architecture/system_architecture.svg)
+
+PlantUML のソースコードは[こちら](docs/system_architecture/system_architecture.pu)にあります。
 
 ## 進捗状況
 
@@ -152,6 +161,14 @@ DATABASE_URL=sqlite:///db.sqlite3
 ```
 
 > ※ 本番運用する場合は ALLOWED_HOSTS や 必要に応じて CSRF_TRUSTED_ORIGINS などの設定も追加してください。
+
+> ※ SECRET_KEY は安全なランダム文字列である必要があります。以下のコマンドで生成できます：
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe())"
+```
+
+> 生成された文字列を `.env` の `SECRET_KEY` にコピーしてください。
 
 ## テスト
 
