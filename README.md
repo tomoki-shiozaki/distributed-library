@@ -47,11 +47,15 @@
   ※ Cloud Run はサーバレス環境のため、初回アクセス時にコールドスタートが発生し、約 10 秒程度の起動時間がかかる場合があります。
   また、起動後のレスポンスも 1〜3 秒ほどかかることがあります。あらかじめご了承ください。
 
+  > 本番環境（Cloud Run）へのデプロイは、Google Cloud の Cloud Build により自動化されています。  
+  > GitHub へのプッシュをトリガーに、`cloudbuild.yaml` が実行され、`docker/Dockerfile.prod` を用いてコンテナイメージをビルド・デプロイします。  
+  > 起動処理には `entrypoint.sh` を使用しており、Django アプリの起動やマイグレーション、静的ファイル収集などの初期処理を含んでいます。
+
 - 代替環境 URL (Render - Python 環境): https://distributed-library-2.onrender.com
 
   ※ Render の無料プランを使っており、初回起動に約 1 分程度かかる場合がありますが、起動後は比較的高速に応答します。
 
-- 代替環境 URL (Render - Docker 環境):https://distributed-library-q6cj.onrender.com
+- 代替環境 URL (Render - Docker 環境): https://distributed-library-q6cj.onrender.com
 
   ※ Docker 環境でも同様に初回起動に時間がかかる場合がありますが、動作環境の違いを確認いただけます。
 
@@ -64,7 +68,10 @@
   | 司書           | librarian1 | dev_librarian1_123! |
 
   > ※これらのアカウントはテスト用です。本番環境の重要な情報は含まれていません。
-  > 動作確認にはこれらのテストアカウントをご利用ください。
+
+  > 一般ユーザーについては、上記の `general1` や `general2` アカウントを利用していただいても構いませんし、  
+  > 画面上の「新規登録」機能から自由にアカウントを作成いただいても問題ありません。  
+  > 一方、**「司書」アカウントはユーザー画面から新規作成できないため**、テストには上記の `librarian1` アカウントをご利用ください。
 
 ## システム構成図（Cloud Run デプロイ構成）
 
@@ -143,6 +150,8 @@ docker compose exec web bash
 # マイグレーションを実行
 python manage.py migrate
 ```
+
+ブラウザで `http://127.0.0.1:8000/`（または `http://localhost:8000/`）にアクセスしてください。
 
 ### 環境変数設定 (.env ファイル)
 
