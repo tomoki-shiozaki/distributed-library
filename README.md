@@ -91,8 +91,8 @@
 
 本プロジェクトは主要な本番環境として Google Cloud の Cloud Run を用いており、サーバーレス環境での運用を行っています。 以下に、Cloud Run 環境へのデプロイを含むシステム全体の構成図を示します。
 
-**図をクリックすると拡大表示されます。**  
-[![システム構成図](docs/system_architecture/system_architecture/system_architecture.svg)](docs/system_architecture/system_architecture/system_architecture.svg)
+**画像を右クリックして、「新しいタブで画像を開く」としていただくと、拡大された画像がご覧になれます。**  
+![システム構成図](docs/system_architecture/system_architecture/system_architecture.svg)
 
 PlantUML のソースコードは[こちら](docs/system_architecture/system_architecture.pu)にあります。
 
