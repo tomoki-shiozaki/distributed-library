@@ -1,5 +1,7 @@
 # 分散型図書管理アプリ
 
+![Build Status](https://github.com/tomoki-shiozaki/distributed-library/actions/workflows/ci.yml/badge.svg)
+
 ## 概要
 
 本アプリは図書館向けの管理システムで、書籍の登録や一般利用者による貸出・予約・返却機能などの機能を備えています。企業のビル内の各所に書籍が分散して保管されていることを想定し、これらを一元管理するためのアプリです。
