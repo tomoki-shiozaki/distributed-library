@@ -49,7 +49,7 @@
 
   > 本番環境（Cloud Run）へのデプロイは、Google Cloud の Cloud Build により自動化されています。  
   > GitHub へのプッシュをトリガーに、`cloudbuild.yaml` が実行され、`docker/Dockerfile.prod` を用いてコンテナイメージをビルド・デプロイします。  
-  > 起動処理には `entrypoint.sh` を使用しており、Django アプリの起動やマイグレーション、静的ファイル収集などの初期処理を含んでいます。
+  > 起動処理には `docker/entrypoint.sh` を使用しており、Django アプリの起動やマイグレーション、静的ファイル収集などの初期処理を含んでいます。
 
 - 代替環境 URL (Render - Python 環境): https://distributed-library-2.onrender.com
 

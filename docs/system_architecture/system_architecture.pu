@@ -22,6 +22,10 @@ package "Neon" {
   component "Neon PostgreSQL" as NeonPostgreSQL
 }
 
+package "External APIs" {
+  component "Google Books API" as GoogleBooksAPI
+}
+
 ' 開発からデプロイ
 Developer --> GitHubRepo : Push Code
 GitHubRepo --> CloudBuild : Trigger CI/CD
@@ -37,5 +41,8 @@ CloudRun --> SecretManager : Fetch Secrets
 User --> CloudRun : HTTP Request
 CloudRun --> NeonPostgreSQL : DB Access
 CloudRun ..> Logging : Send Logs
+
+' 本の情報取得
+CloudRun --> GoogleBooksAPI : Fetch Book Info (by ISBN)
 
 @enduml
