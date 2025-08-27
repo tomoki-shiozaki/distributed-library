@@ -15,10 +15,15 @@ package "Google Cloud" {
   component "Artifact Registry" as ArtifactRegistry
   component "Cloud Run" as CloudRun
   component "Cloud Logging" as Logging
+  component "Secret Manager" as SecretManager
 }
 
 package "Neon" {
   component "Neon PostgreSQL" as NeonPostgreSQL
+}
+
+package "External APIs" {
+  component "Google Books API" as GoogleBooksAPI
 }
 
 ' 開発からデプロイ
@@ -28,9 +33,16 @@ CloudBuild --> ArtifactRegistry : Push Container Image
 CloudBuild --> CloudRun : Deploy Image
 ArtifactRegistry --> CloudRun : Pull Image
 
+' シークレット管理
+CloudRun --> SecretManager : Fetch Secrets
+
+
 ' アプリ実行
 User --> CloudRun : HTTP Request
 CloudRun --> NeonPostgreSQL : DB Access
 CloudRun ..> Logging : Send Logs
+
+' 本の情報取得
+CloudRun --> GoogleBooksAPI : Fetch Book Info (by ISBN)
 
 @enduml

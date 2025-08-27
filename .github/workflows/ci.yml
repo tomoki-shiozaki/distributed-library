@@ -30,6 +30,12 @@ jobs:
       - name: Set environment variable SECRET_KEY
         run: echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> $GITHUB_ENV
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
-          pytest
+          coverage run -m pytest
+          coverage xml -o coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
