@@ -3,7 +3,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.accounts.models import CustomUser
-from .forms import CustomUserCreationForm, CustomUserChangeForm
+
+from .forms import CustomUserChangeForm, CustomUserCreationForm
 
 GENERAL = CustomUser.UserRole.GENERAL
 LIBRARIAN = CustomUser.UserRole.LIBRARIAN
@@ -164,10 +165,8 @@ class CustomUserCreationFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("password2", form.errors)  # password2 にエラーがあることを確認
 
-        self.assertIn(
-            "This password is too short. It must contain at least 8 characters.",
-            str(form.errors["password2"]),
-        )
+        errors = form.errors["password2"]
+        self.assertTrue(any("短すぎ" in e for e in errors))
 
 
 class CustomUserChangeFormTest(TestCase):

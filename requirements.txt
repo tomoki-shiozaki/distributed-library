@@ -5,7 +5,7 @@ coverage==7.9.1
 crispy-bootstrap5==2025.4
 dj-database-url==2.3.0
 dj-email-url==1.0.6
-Django==5.2
+Django==5.2.5
 django-cache-url==3.4.5
 django-crispy-forms==2.4
 environs==14.1.1

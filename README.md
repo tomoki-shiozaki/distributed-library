@@ -1,12 +1,26 @@
 # 分散型図書管理アプリ
 
-![Build Status](https://github.com/tomoki-shiozaki/distributed-library/actions/workflows/ci.yml/badge.svg)
+[![Build Status](https://github.com/tomoki-shiozaki/distributed-library/actions/workflows/ci.yml/badge.svg)](https://github.com/tomoki-shiozaki/distributed-library/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/github/tomoki-shiozaki/distributed-library/graph/badge.svg?token=4ZXIBJGTXA)](https://codecov.io/github/tomoki-shiozaki/distributed-library)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+## 概要
+
+本アプリは図書館向けの管理システムで、書籍の登録や一般利用者による貸出・予約・返却機能などの機能を備えています。企業のビル内の各所に書籍が分散して保管されていることを想定し、これらを一元管理するためのアプリです。
+分散した本の貸出や予約状況をオンラインで管理することで、利用者と管理者の双方に利便性を提供します。
+
+本アプリは就労移行支援の訓練として開発されましたが、実際の業務に即した実践的な機能を盛り込んでいます。
+たとえば、貸出や予約時に利用者ごとにロック機能を設けるなど、現場での運用を意識した仕様となっています。
+
+本アプリは Google Cloud の Cloud Run 上にデプロイされており、[こちらの URL](https://distributed-library-1066453624488.asia-northeast1.run.app/)から実際にお試しいただけます。  
+※初回アクセス時はサーバレス環境の特性上、起動に約 10 秒程度かかる場合があります。ご了承ください。  
+デプロイ・実行環境の詳細は [「デプロイと実行環境」セクション](#デプロイと実行環境)をご覧ください。
 
 ## 目次
 
 - [分散型図書管理アプリ](#分散型図書管理アプリ)
-  - [目次](#目次)
   - [概要](#概要)
+  - [目次](#目次)
   - [目的](#目的)
   - [使用環境](#使用環境)
     - [OS](#os)
@@ -27,18 +41,8 @@
       - [ローカル（venv）での実行](#ローカルvenvでの実行)
       - [Docker コンテナ上での実行](#docker-コンテナ上での実行)
     - [テストカバレッジ](#テストカバレッジ)
-
-## 概要
-
-本アプリは図書館向けの管理システムで、書籍の登録や一般利用者による貸出・予約・返却機能などの機能を備えています。企業のビル内の各所に書籍が分散して保管されていることを想定し、これらを一元管理するためのアプリです。
-分散した本の貸出や予約状況をオンラインで管理することで、利用者と管理者の双方に利便性を提供します。
-
-本アプリは就労移行支援の訓練として開発されましたが、実際の業務に即した実践的な機能を盛り込んでいます。
-たとえば、貸出や予約時に利用者ごとにロック機能を設けるなど、現場での運用を意識した仕様となっています。
-
-本アプリは Google Cloud の Cloud Run 上にデプロイされており、[こちらの URL](https://distributed-library-1066453624488.asia-northeast1.run.app/)から実際にお試しいただけます。  
-※初回アクセス時はサーバレス環境の特性上、起動に約 10 秒程度かかる場合があります。ご了承ください。  
-デプロイ・実行環境の詳細は [「デプロイと実行環境」セクション](#デプロイと実行環境)をご覧ください。
+    - [CI でのテストとカバレッジ](#ci-でのテストとカバレッジ)
+  - [ライセンス](#ライセンス)
 
 ## 目的
 
@@ -255,3 +259,20 @@ docker compose exec web pytest
 coverage run -m pytest
 coverage report
 ```
+
+### CI でのテストとカバレッジ
+
+本プロジェクトでは、GitHub Actions を使った CI パイプラインで
+
+- テストの自動実行
+- テストカバレッジの計測および報告（Codecov 連携）
+
+を行っています。  
+これにより、コードの品質とテスト網羅率を継続的にモニタリングします。
+
+[GitHub Actions](https://github.com/tomoki-shiozaki/distributed-library/actions)  
+[Codecov](https://codecov.io/gh/tomoki-shiozaki/distributed-library)
+
+## ライセンス
+
+このプロジェクトは [MIT ライセンス](LICENSE) のもとで公開されています。
