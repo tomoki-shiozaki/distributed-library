@@ -41,6 +41,7 @@
       - [ローカル（venv）での実行](#ローカルvenvでの実行)
       - [Docker コンテナ上での実行](#docker-コンテナ上での実行)
     - [テストカバレッジ](#テストカバレッジ)
+    - [CI でのテストとカバレッジ](#ci-でのテストとカバレッジ)
   - [ライセンス](#ライセンス)
 
 ## 目的
@@ -258,6 +259,19 @@ docker compose exec web pytest
 coverage run -m pytest
 coverage report
 ```
+
+### CI でのテストとカバレッジ
+
+本プロジェクトでは、GitHub Actions を使った CI パイプラインで
+
+- テストの自動実行
+- テストカバレッジの計測および報告（Codecov 連携）
+
+を行っています。  
+これにより、コードの品質とテスト網羅率を継続的にモニタリングしています。
+
+[GitHub Actions](https://github.com/tomoki-shiozaki/distributed-library/actions)  
+[Codecov](https://codecov.io/gh/tomoki-shiozaki/distributed-library)
 
 ## ライセンス
 
