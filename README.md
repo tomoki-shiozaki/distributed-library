@@ -268,7 +268,7 @@ coverage report
 - テストカバレッジの計測および報告（Codecov 連携）
 
 を行っています。  
-これにより、コードの品質とテスト網羅率を継続的にモニタリングしています。
+これにより、コードの品質とテスト網羅率を継続的にモニタリングします。
 
 [GitHub Actions](https://github.com/tomoki-shiozaki/distributed-library/actions)  
 [Codecov](https://codecov.io/gh/tomoki-shiozaki/distributed-library)
