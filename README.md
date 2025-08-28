@@ -1,6 +1,6 @@
 # 分散型図書管理アプリ
 
-![Build Status](https://github.com/tomoki-shiozaki/distributed-library/actions/workflows/ci.yml/badge.svg)
+[![Build Status](https://github.com/tomoki-shiozaki/distributed-library/actions/workflows/ci.yml/badge.svg)](https://github.com/tomoki-shiozaki/distributed-library/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/tomoki-shiozaki/distributed-library/graph/badge.svg?token=4ZXIBJGTXA)](https://codecov.io/github/tomoki-shiozaki/distributed-library)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
