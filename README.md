@@ -2,6 +2,7 @@
 
 ![Build Status](https://github.com/tomoki-shiozaki/distributed-library/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/github/tomoki-shiozaki/distributed-library/graph/badge.svg?token=4ZXIBJGTXA)](https://codecov.io/github/tomoki-shiozaki/distributed-library)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 概要
 
@@ -40,6 +41,7 @@
       - [ローカル（venv）での実行](#ローカルvenvでの実行)
       - [Docker コンテナ上での実行](#docker-コンテナ上での実行)
     - [テストカバレッジ](#テストカバレッジ)
+  - [ライセンス](#ライセンス)
 
 ## 目的
 
@@ -256,3 +258,7 @@ docker compose exec web pytest
 coverage run -m pytest
 coverage report
 ```
+
+## ライセンス
+
+このプロジェクトは [MIT ライセンス](LICENSE) のもとで公開されています。
