@@ -43,6 +43,7 @@
     - [テストカバレッジ](#テストカバレッジ)
     - [CI でのテストとカバレッジ](#ci-でのテストとカバレッジ)
   - [ライセンス](#ライセンス)
+  - [作者 / Author](#作者--author)
 
 ## 目的
 
@@ -276,3 +277,8 @@ coverage report
 ## ライセンス
 
 このプロジェクトは [MIT ライセンス](LICENSE) のもとで公開されています。
+
+## 作者 / Author
+
+塩崎 友貴 (Tomoki Shiozaki)  
+[GitHub アカウント](https://github.com/tomoki-shiozaki)
