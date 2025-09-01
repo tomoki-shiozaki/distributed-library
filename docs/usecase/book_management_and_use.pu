@@ -9,28 +9,23 @@ actor 一般ユーザー as loggedInUser
 rectangle "分散型図書管理アプリ" {
 package "本の管理" {
   (本を登録する)
+  (ISBNを入力する)
   (本を登録する) ..> (ISBNを入力する) : <<include>>
 }
 
 package "本の利用" {
   (本を検索する)
+  (本の詳細情報を確認する)
   (貸出・予約する)
-  (ISBNを入力する)
-  (貸出・予約情報を確認する)
-  (各本のおすすめ書籍を紹介する)
-
   
   (自分が貸出・予約中の本を確認する)
   (返却する・予約を取り消す)
-
-  note right of (各本のおすすめ書籍を紹介する)
-  おすすめ書籍は、著者のほかの著作を予定
-  end note 
+  (予約した資料を貸し出す)
   
 }
 }
 
-rectangle "openBD" {
+rectangle "Google Books API" {
   (本情報取得)
 }
 
@@ -40,26 +35,15 @@ loggedInLibrarian --> (本を登録する)
 ' 本の検索から貸出・予約完了表示までは一連の処理
 loggedInUser --> (本を検索する)  
 loggedInUser --> (貸出・予約する) 
-loggedInUser --> (貸出・予約情報を確認する) 
-loggedInUser --> (各本のおすすめ書籍を紹介する)
+loggedInUser --> (本の詳細情報を確認する) 
 
 (ISBNを入力する) ..> (本情報取得) : <<include>>
 
 loggedInUser --> (自分が貸出・予約中の本を確認する)
 loggedInUser --> (返却する・予約を取り消す)
+loggedInUser --> (予約した資料を貸し出す)
 
-
-note top of (loggedInLibrarian)
-    ログインが必要
-end note
-
-note top of (loggedInUser)
-    ログインが必要
-end note
-
-
-
-note bottom of "openBD"
+note top of "Google Books API"
     外部システム(API)。
     ISBNを入力すると、本のデータを送ってくれる。
 end note 
