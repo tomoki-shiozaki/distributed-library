@@ -1,64 +1,66 @@
 @startuml er
- skinparam defaultFontName "Noto Sans CJK JP"
- entity "ユーザーマスター" as User {
-   +ユーザーID <<PK>>
-   +ログイン名 <<UNIQUE>>
-   +メールアドレス
-   +パスワード
-   +ロール <<一般/司書>>
- }
- 
- entity "本マスター" as book {
-   +本ID <<PK>>
-   +ISBN <<UNIQUE>>
-   +タイトル 
-   +著者
-   +出版日
-   +出版社
-   +画像用リンク
-   +版数
- }
+skinparam defaultFontName "Noto Sans CJK JP"
+entity "ユーザーマスター" as User {
+  +ユーザーID <<PK>>
+  +ログイン名 <<UNIQUE>>
+  +メールアドレス
+  +パスワード
+  +ロール <<一般/司書>>
+}
 
- entity "蔵書" as Copy {
-   +蔵書ID <<PK>>
-   +本ID <<FK>>
-   +保存場所ID <<FK>>
-   +ステータス <<利用可能/貸出中/廃棄済み>>
-   +登録日
- }
+entity "本マスター" as book {
++本ID <<PK>>
++ISBN <<UNIQUE>>
++タイトル 
++著者
++出版社
++出版日
++出版日の精度 <<不明/年/年月/年月日>>
++画像用リンク
++版数
++内容紹介
+}
 
- entity "保存場所マスター" as Location {
-   +保存場所ID <<PK>>
-   +保存場所名
- }
-
- entity "貸出履歴" as LoanHistory {
-  +貸出ID <<PK>>
-  +ユーザーID <<FK>>
-  +蔵書ID <<FK>>
-  +貸出日 
-  +返却予定日 
-  +返却日
-  +ステータス <<貸出中/返却済み>>
- }
-
- entity "予約履歴" as ReservationHistory {
-  +予約ID <<PK>>
-  +ユーザーID <<FK>>
+entity "蔵書" as Copy {
+  +蔵書ID <<PK>>
   +本ID <<FK>>
-  +予約開始日時
-  +予約終了日時
-  +ステータス <<予約中/キャンセル/完了>>
-  +予約作成日
- }
- 
- User ||--o{ LoanHistory : ユーザーID
- Copy ||--o{ LoanHistory : 蔵書ID
- book ||--|{ Copy : 本ID
- Location ||--o{ Copy : 保存場所ID
+  +保存場所ID <<FK>>
+  +ステータス <<利用可能/貸出中/廃棄済み>>
+  +登録日
+}
 
- User ||--o{ ReservationHistory : ユーザーID
- book ||--o{ ReservationHistory : 本ID
+entity "保存場所マスター" as Location {
+  +保存場所ID <<PK>>
+  +保存場所名
+}
+
+entity "貸出履歴" as LoanHistory {
++貸出ID <<PK>>
++ユーザーID <<FK>>
++蔵書ID <<FK>>
++貸出日 
++返却予定日 
++返却日
++ステータス <<貸出中/返却済み>>
+}
+
+entity "予約履歴" as ReservationHistory {
++予約ID <<PK>>
++ユーザーID <<FK>>
++蔵書ID <<FK>>
++予約開始日
++予約終了日
++ステータス <<予約中/キャンセル/完了>>
++予約作成日
+}
+
+User ||--o{ LoanHistory : ユーザーID
+Copy ||--o{ LoanHistory : 蔵書ID
+book ||--|{ Copy : 本ID
+Location ||--o{ Copy : 保存場所ID
+
+User ||--o{ ReservationHistory : ユーザーID
+Copy ||--o{ ReservationHistory : 蔵書ID
 
 
- @enduml
+@enduml

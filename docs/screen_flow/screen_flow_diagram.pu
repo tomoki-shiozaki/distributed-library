@@ -27,7 +27,7 @@ state "司書利用メニュー\n 蔵書の登録" as bookManagement #LightGreen
     state "ISBNを入力する画面\n アプリのDBに書籍が登録されているかを確認する" as isbnCheckForm <<操作>>
     state "書籍を登録する画面\n APIで書籍データを自動で取得する" as bookCreate <<操作>>
     state "蔵書を登録する画面\n 保存場所、状態を入力する" as copyCreate <<操作>>
-    state "登録した蔵書を確認する画面\n 書影、タイトル、保存場所などを確認する" as copyConfirm <<表示>>
+    state "登録した蔵書を確認する画面\n タイトル、保存場所などを確認する" as copyConfirm <<表示>>
 }
 librarian --> isbnCheckForm
 isbnCheckForm --> bookCreate : 書籍がDBに未登録の場合
@@ -37,26 +37,22 @@ copyCreate --> copyConfirm
 copyConfirm --> librarian
 copyConfirm --> isbnCheckForm : 蔵書を続けて登録する場合
 
-state "一般ユーザー利用メニュー\n 本の検索・貸出・予約および返却・予約取り消し" as bookUse #LightBlue {
-    state "蔵書の検索画面\n タイトル、著者名を入力する" as bookSearch <<検索>> 
-    state "蔵書の検索結果表示画面\n（蔵書のリストが表示される）" as searchResult <<表示>>
-    state "本の情報確認画面\n 貸出状況（貸出可または貸出中）や書影、関連書籍など" as bookStatus <<表示>>
-    state "貸出・予約画面\n 本を借りたり、予約するための操作をする" as borrowAndBook <<操作>>
-    state "貸出・予約完了表示画面\n 本の名前・貸出期間・本の場所が表示される" as borrowCompletion <<表示>>
+state "一般ユーザー利用メニュー\n 本の検索・貸出・予約および返却・予約取り消し・予約資料の貸し出し" as bookUse #LightBlue {
+    state "本の検索画面\n タイトル・著者名などの入力と検索結果の表示" as bookSearch <<検索>>
+    state "本の情報確認画面\n 書影や各蔵書の貸出状況など" as bookStatus <<表示>>
+    state "貸出画面\n 本を借りるための操作をする" as borrowBook <<操作>>
+    state "予約画面\n 本を予約するための操作をする" as reserveBook <<操作>>
     
-    state "マイライブラリ\n（自分が借りている本、予約している本のリストを見ることができる）" as borrowingBooks <<表示>>
-    state "返却・予約取消画面" as returnAndCancelReservation <<操作>>
+    state "マイライブラリ\n（自分の貸出・予約中の本の一覧確認と操作（返却、予約取り消し、予約資料の貸し出し）を行う）" as borrowingBooks <<操作>>
 
     ' 本の貸出の流れ
-    bookSearch --> searchResult
-    searchResult --> bookStatus : 本を選択し、詳細を確認
-    bookStatus --> borrowAndBook
-    borrowAndBook --> borrowCompletion
-    borrowCompletion --> bookSearch 
+    bookSearch  --> bookStatus : 本を選択し、詳細を確認
+    bookStatus --> bookSearch : 検索結果に戻るボタン押下
+    bookStatus --> borrowBook : 貸出ボタン押下
+    bookStatus --> reserveBook : 予約ボタン押下
+    borrowBook --> bookStatus : 貸出完了通知付きで戻る
+    reserveBook --> bookStatus : 予約完了通知付きで戻る
     
-    ' 本の返却の流れ
-    borrowingBooks --> returnAndCancelReservation
-    returnAndCancelReservation --> borrowingBooks : 返却・予約取り消し後
 }
 user --> bookSearch
 user --> borrowingBooks
