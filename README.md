@@ -45,6 +45,7 @@
       - [Render - Python 環境](#render---python-環境)
       - [Render - Docker 環境](#render---docker-環境)
   - [システム構成図（Cloud Run デプロイ構成）](#システム構成図cloud-run-デプロイ構成)
+  - [操作マニュアル](#操作マニュアル)
   - [進捗状況](#進捗状況)
   - [開発ドキュメント](#開発ドキュメント)
   - [必要な環境と依存関係](#必要な環境と依存関係)
@@ -169,6 +170,22 @@
 ![システム構成図](docs/system_architecture/system_architecture/system_architecture.svg)
 
 PlantUML のソースコードは[こちら](docs/system_architecture/system_architecture.pu)にあります。
+
+## 操作マニュアル
+
+本アプリの操作方法については、以下のマニュアルをご覧ください：
+
+📄 [docs/manual/manual.md](docs/manual/manual.md)
+
+このマニュアルでは以下を説明しています：
+
+- 一般ユーザー・司書の役割と違い
+- アカウント関連操作（新規登録、ログイン、ログアウト、パスワード変更）
+- 書籍の検索、貸出、返却、予約(一般ユーザー向け)
+- 書籍の登録（司書向け）
+- よくある質問（FAQ）
+
+はじめてアプリを利用する方は、このマニュアルの内容に一度目を通しておくとスムーズです。
 
 ## 進捗状況
 
